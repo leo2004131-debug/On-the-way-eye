@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateHeaderAvatar();
     initMap();
     await refreshUserFromDB();
-    switchRole('recipient');
+    switchRole('recipient', { initial: true });
 });
 
 // --- 地圖初始化 ---
@@ -162,7 +162,7 @@ function hideSuggestions() {
 }
 
 // --- 任務標記渲染 ---
-async function filterAndRenderTasks(kw) {
+async function filterAndRenderTasks(kw, { autoFit = false, flyToOngoing = false } = {}) {
     kw = kw || '';
     taskMarkers.forEach(m => map.removeLayer(m));
     taskMarkers = [];
@@ -184,7 +184,9 @@ async function filterAndRenderTasks(kw) {
                     })
                 }).addTo(map).on('click', () => showTaskDetail(ongoing));
                 taskMarkers.push(m);
-                map.flyTo([ongoing.lat, ongoing.lng], 17);
+                if (flyToOngoing) {
+                    map.flyTo([ongoing.lat, ongoing.lng], 17);
+                }
                 activeTask = ongoing;
             } else {
                 activeTask = null;
@@ -224,10 +226,10 @@ async function filterAndRenderTasks(kw) {
             });
         }
 
-        // 無搜尋字時自動縮放涵蓋所有標記
-        if (taskMarkers.length > 0 && kw === '') {
+        // 僅在初始載入且無進行中任務時自動縮放涵蓋所有標記（切換角色與日常篩選時保持當前視角與縮放比例）
+        if (autoFit && !activeTask && taskMarkers.length > 0 && kw === '') {
             const group = new L.featureGroup(taskMarkers);
-            map.fitBounds(group.getBounds().pad(0.3));
+            map.fitBounds(group.getBounds().pad(0.3), { maxZoom: 16 });
         }
     } catch (err) {
         console.error('讀取任務失敗:', err);
@@ -235,7 +237,7 @@ async function filterAndRenderTasks(kw) {
 }
 
 // --- 角色切換（修正原版引用不存在的 main-fab、靠 400ms 輪詢補救的 bug） ---
-function switchRole(r) {
+function switchRole(r, { initial = false } = {}) {
     currentRole = r;
     const container = document.getElementById('role-toggle-container');
     const publishBtn = document.getElementById('publish-task-btn');
@@ -254,7 +256,10 @@ function switchRole(r) {
     document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(r === 'recipient' ? 'btn-role-recipient' : 'btn-role-requester').classList.add('active');
 
-    filterAndRenderTasks(document.getElementById('search-input').value.trim());
+    filterAndRenderTasks(document.getElementById('search-input').value.trim(), {
+        autoFit: initial,
+        flyToOngoing: initial
+    });
 }
 
 // --- 5 公里鄰近模式開關 ---
@@ -416,6 +421,7 @@ async function acceptTask() {
             transaction.update(taskRef, { status: 'ongoing', handler: currentUser.email });
         });
         closeModal();
+        map.flyTo([selectedTask.lat, selectedTask.lng], 17);
         filterAndRenderTasks('');
         alert('✅ 接單成功！請前往現場。');
     } catch (err) {
