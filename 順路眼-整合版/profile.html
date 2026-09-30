@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>順路眼 - 個人中心</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div id="top-left-avatar-btn" onclick="location.href='profile.html'"><span>👤</span></div>
+            <h1>個人中心</h1>
+        </header>
+
+        <!-- 4.0 個人中心 -->
+        <main>
+            <div class="profile-card">
+                <div class="profile-main">
+                    <div class="profile-avatar-container" id="profile-avatar" onclick="triggerProfileAvatarPicker()" title="點擊更換頭像">👤</div>
+                    <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;" onchange="handleChangeAvatar(event)">
+                    <h2 id="profile-name">尚未登入</h2>
+                    <p class="credit-badge">信用等級：優良 (A級)</p>
+                </div>
+            </div>
+
+            <!-- 隱私與安全 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🔒 隱私與安全</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 15px; color: #333;">即時定位追蹤</strong>
+                            <div style="font-size: 12px; color: #777; margin-top: 2px;">控制地圖上傳位置</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-gps-tracking" checked onchange="handlePrivacyChange()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 帳號安全 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🔑 帳號安全</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <input type="password" id="change-old-pass" placeholder="舊密碼">
+                    <input type="password" id="change-new-pass" placeholder="新密碼">
+                    <button type="button" class="approve-btn" onclick="handleChangePassword()" style="width: 100%; margin-top: 4px;">修改密碼</button>
+                </div>
+            </div>
+
+            <!-- 歷史評價 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>⭐ 歷史評價</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div id="review-list" class="review-list">
+                        <p class="no-data-msg">載入中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="menu-list">
+                <li class="logout-item" onclick="handleLogout()">登出帳號</li>
+            </ul>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="map.html" class="nav-item"><span>📍</span><span>地圖</span></a>
+            <a href="tasks.html" class="nav-item"><span>📋</span><span>任務</span></a>
+            <a href="wallet.html" class="nav-item"><span>💰</span><span>錢包</span></a>
+            <a href="profile.html" class="nav-item active"><span>👤</span><span>個人</span></a>
+        </nav>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

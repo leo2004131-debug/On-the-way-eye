@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>順路眼 - 註冊帳號</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="register-view">
+            <div class="reg-header">
+                <button type="button" class="back-btn" onclick="location.href='index.html'">❮</button>
+                <h2>建立帳號</h2>
+            </div>
+            <div class="avatar-center-container">
+                <div class="avatar-wrapper" onclick="document.getElementById('avatar-file-input').click()">
+                    <div class="avatar-large neon-border">
+                        <span id="default-avatar-icon" style="font-size: 2.5rem;">👤</span>
+                        <img id="avatar-img-preview" src="" alt="預覽頭像" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    </div>
+                    <div class="camera-badge">📷</div>
+                    <input type="file" id="avatar-file-input" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
+                </div>
+                <div class="avatar-label">點擊選取個人頭像</div>
+            </div>
+            <form id="register-form">
+                <div class="neon-input-group">👤<input type="text" id="reg-nick" placeholder="暱稱" required></div>
+                <div class="neon-input-group">✉️<input type="email" id="reg-email" placeholder="電子郵件" required></div>
+                <div class="neon-input-group">🔒<input type="password" id="reg-pass" placeholder="密碼" required></div>
+                <div class="neon-input-group">🔒<input type="password" id="reg-confirm" placeholder="確認密碼" required></div>
+                <button type="submit" class="reg-main-btn">建立帳號</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

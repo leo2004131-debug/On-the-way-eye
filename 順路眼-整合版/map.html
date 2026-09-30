@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>順路眼 - 地圖大廳</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div id="top-left-avatar-btn" onclick="location.href='profile.html'"><span>👤</span></div>
+            <h1>地圖大廳</h1>
+        </header>
+
+        <!-- 1.0 地圖大廳 -->
+        <section class="map-section">
+            <div id="map"></div>
+
+            <div class="map-header-controls">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="搜尋地標或地址..." autocomplete="off">
+                    <div id="search-suggestions" class="search-suggestions" style="display: none;"></div>
+                </div>
+                <div id="role-toggle-container" class="role-switch-container">
+                    <div class="role-switch-slider"></div>
+                    <button type="button" id="btn-role-recipient" class="role-btn active" onclick="switchRole('recipient')">接收人</button>
+                    <button type="button" id="btn-role-requester" class="role-btn" onclick="switchRole('requester')">委託人</button>
+                </div>
+                <div class="gps-status-bar">
+                    <span id="gps-dot" class="status-dot"></span>
+                    <span id="gps-text">GPS 未連接</span>
+                </div>
+            </div>
+
+            <div class="movement-controls">
+                <button type="button" class="move-btn" onclick="moveUser('up')">▲</button>
+                <div class="move-row">
+                    <button type="button" class="move-btn" onclick="moveUser('left')">◀</button>
+                    <button type="button" class="move-btn" onclick="moveUser('down')">▼</button>
+                    <button type="button" class="move-btn" onclick="moveUser('right')">▶</button>
+                </div>
+            </div>
+
+            <div id="picker-hint" class="picker-hint" style="display: none;">📍 請點擊地圖選擇任務地點...</div>
+
+            <button type="button" id="locate-btn" class="locate-btn" onclick="toggleGps()">🛰️ 開始定位</button>
+            <button type="button" id="nearby-btn" class="nearby-btn" onclick="toggleNearbyMode()">🌐 顯示全部任務</button>
+            <button type="button" id="publish-task-btn" style="display: none;" onclick="openPublishModal()">發布任務</button>
+        </section>
+
+        <!-- 抵達通知 -->
+        <div id="arrival-alert" class="arrival-alert" style="display: none;">
+            <div class="alert-content">
+                <span class="close-btn" onclick="closeArrivalAlert()">&times;</span>
+                <h3>🎉 您已抵達目的地！</h3>
+                <p>已進入任務範圍，請拍攝現場照片完成回報。</p>
+                <button type="button" class="report-now-btn" onclick="startReportFromAlert()">立即開始回報</button>
+            </div>
+        </div>
+
+        <!-- 任務詳情彈窗 -->
+        <div id="task-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title"></h3>
+                    <button type="button" class="close-modal" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="task-detail-row"><span>懸賞點數：</span><span class="reward-value" id="modal-reward"></span></div>
+                    <p id="modal-desc" class="task-desc"></p>
+                    <div class="task-location">📍 <span id="modal-loc"></span></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="accept-btn" onclick="acceptTask()">接受任務</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 發布任務彈窗 -->
+        <div id="publish-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>發布任務</h3>
+                    <button type="button" class="close-modal" onclick="closePublishModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group"><label>任務標題</label><input id="pub-title" placeholder="例如：幫買大冰奶"></div>
+                    <div class="form-group"><label>懸賞點數</label><input id="pub-reward" type="number" placeholder="10 - 100"></div>
+                    <div class="form-group"><label>需求描述</label><textarea id="pub-desc" rows="3" placeholder="請填寫詳細需求..."></textarea></div>
+                    <div class="location-picker-box" onclick="enterMapPickerMode()">
+                        <p id="pub-loc-status">📍 點擊在地圖選取位置</p>
+                        <input type="hidden" id="pub-lat"><input type="hidden" id="pub-lng">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="accept-btn" onclick="submitNewTask()">正式發布 (-10點)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 防偽相機：只允許即時拍攝（capture），不開放相簿 -->
+        <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="handlePhoto(event)">
+
+        <nav class="bottom-nav">
+            <a href="map.html" class="nav-item active"><span>📍</span><span>地圖</span></a>
+            <a href="tasks.html" class="nav-item"><span>📋</span><span>任務</span></a>
+            <a href="wallet.html" class="nav-item"><span>💰</span><span>錢包</span></a>
+            <a href="profile.html" class="nav-item"><span>👤</span><span>個人</span></a>
+        </nav>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/map.js"></script>
+</body>
+</html>

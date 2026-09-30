@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>順路眼 - 完整交易明細</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div id="top-left-avatar-btn" onclick="location.href='profile.html'"><span>👤</span></div>
+            <h1>完整交易明細</h1>
+        </header>
+
+        <!-- 3.1 完整交易明細 -->
+        <main>
+            <div class="history-header">
+                <button type="button" onclick="location.href='wallet.html'">⬅</button>
+                <h2>全部交易紀錄</h2>
+            </div>
+            <div id="full-transaction-list" class="full-history-list"></div>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="map.html" class="nav-item"><span>📍</span><span>地圖</span></a>
+            <a href="tasks.html" class="nav-item"><span>📋</span><span>任務</span></a>
+            <a href="wallet.html" class="nav-item active"><span>💰</span><span>錢包</span></a>
+            <a href="profile.html" class="nav-item"><span>👤</span><span>個人</span></a>
+        </nav>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/wallet.js"></script>
+</body>
+</html>

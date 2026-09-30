@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>順路眼 - 登入</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="login-view">
+            <div class="login-header">
+                <div class="logo-circle">👁️</div>
+                <h1>順路眼</h1>
+            </div>
+            <form id="login-form" class="login-body">
+                <div class="input-field"><input type="text" id="login-user" placeholder="電子郵件" required></div>
+                <div class="input-field"><input type="password" id="login-pass" placeholder="密碼" required></div>
+                <button type="submit" class="login-main-btn">進入大廳</button>
+                <button type="button" class="login-main-btn" style="background-color: #333;" onclick="handleDevLogin()">開發者登入 (快速測試)</button>
+                <div class="login-links">
+                    <span onclick="location.href='register.html'">註冊帳號</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
