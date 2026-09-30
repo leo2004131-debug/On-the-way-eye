@@ -27,10 +27,12 @@ function initMap() {
     map = L.map('map', { zoomControl: false, attributionControl: false })
         .setView([25.0080, 121.4940], 14);
 
-    // 採用舊版（報廢專題）較乾淨的 CartoDB 淺色底圖
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20
+    // 採用 Google Maps 圖資，解決 OSM 在本機測試時因 Referer 產生的 403 Forbidden 阻擋問題
+    L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', {
+        subdomains: ['0', '1', '2', '3'],
+        maxZoom: 20,
+        maxNativeZoom: 19,
+        attribution: '&copy; Google Maps'
     }).addTo(map);
 
     // 等手機外殼排版完成後強制刷新尺寸
