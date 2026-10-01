@@ -17,7 +17,7 @@ function updateProfileAvatarDisplay() {
     const pa = document.getElementById('profile-avatar');
     if (!pa) return;
     pa.innerHTML = (currentUser && currentUser.avatar)
-        ? `<img src="${currentUser.avatar}" alt="頭像">`
+        ? `<img src="${escapeHTML(currentUser.avatar)}" alt="頭像">`
         : '<span>👤</span>';
 }
 
@@ -85,8 +85,8 @@ function renderReviews() {
                 <b>${r.stars}</b>
                 <small style="color:#999;">${r.date}</small>
             </div>
-            <p style="margin:5px 0; font-size:0.9rem;">${r.comment}</p>
-            <small style="color:var(--primary-color);">來自：${r.from || '匿名'}</small>
+            <p style="margin:5px 0; font-size:0.9rem;">${escapeHTML(r.comment)}</p>
+            <small style="color:var(--primary-color);">來自：${escapeHTML(r.from || '匿名')}</small>
         </div>`).join('') || "<p class='no-data-msg'>目前尚無評價</p>";
 }
 

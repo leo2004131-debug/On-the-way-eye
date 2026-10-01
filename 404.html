@@ -16,10 +16,23 @@
                 <p style="color: #888; font-size: 0.95rem; margin-top: 10px;">找不到您請求的頁面</p>
             </div>
             <div class="login-body">
-                <button type="button" class="login-main-btn" onclick="location.href='map.html'">前往地圖大廳</button>
-                <button type="button" class="login-main-btn" style="background-color: #333;" onclick="location.href='index.html'">返回登入頁</button>
+                <button type="button" class="login-main-btn" id="action-btn">返回登入頁</button>
             </div>
         </div>
     </div>
+    <script src="js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loggedIn = loadCurrentUser();
+            const btn = document.getElementById('action-btn');
+            if (loggedIn) {
+                btn.innerText = '前往地圖大廳';
+                btn.onclick = () => location.href = 'map.html';
+            } else {
+                btn.innerText = '返回登入頁';
+                btn.onclick = () => location.href = 'index.html';
+            }
+        });
+    </script>
 </body>
 </html>

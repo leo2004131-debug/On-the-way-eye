@@ -23,7 +23,7 @@ async function addPoints(amt) {
             const logRef = userRef.collection('transactions').doc();
             transaction.set(logRef, {
                 type: '儲值', amount: amount, item: `加點 +${amount}`,
-                time: getTimeStr(), ts: Date.now()
+                time: getTimeStr(), ts: firebase.firestore.FieldValue.serverTimestamp()
             });
         });
         // Transaction 成功後同步本地狀態
@@ -51,7 +51,7 @@ async function exchangeProduct(name, price) {
             const logRef = userRef.collection('transactions').doc();
             transaction.set(logRef, {
                 type: '兌換', amount: -price, item: name,
-                time: getTimeStr(), ts: Date.now()
+                time: getTimeStr(), ts: firebase.firestore.FieldValue.serverTimestamp()
             });
         });
         await refreshUserFromDB();
@@ -85,14 +85,14 @@ async function renderWallet() {
         summaryEl.innerHTML = txs.slice(0, 10).map(t => `
             <div class="wallet-transaction-card" style="flex-direction:column; align-items:stretch; gap:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <div><b>${t.type}</b><br><small>${t.time}</small></div>
+                    <div><b>${escapeHTML(t.type)}</b><br><small>${escapeHTML(t.time)}</small></div>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span class="tx-amount ${t.amount >= 0 ? 'tx-plus' : 'tx-minus'}">${t.amount >= 0 ? '+' : ''}${t.amount}</span>
                         <button class="more-btn" onclick="toggleTransactionDetail(event)">詳情</button>
                     </div>
                 </div>
                 <div class="wallet-detail-expanded-panel">
-                    項目：${t.item || '一般交易'}<br>
+                    項目：${escapeHTML(t.item || '一般交易')}<br>
                     餘額變動：${t.amount} 點
                 </div>
             </div>`).join('') || "<p class='no-data-msg'>尚無紀錄</p>";
@@ -105,8 +105,8 @@ async function renderWallet() {
             <div class="wallet-transaction-card" style="flex-direction:column; align-items:stretch; gap:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <strong style="font-size:15px; color:#333;">${t.type}${t.item ? ` (${t.item})` : ''}</strong>
-                        <div style="font-size:12px; color:#999; margin-top:4px;">${t.time}</div>
+                        <strong style="font-size:15px; color:#333;">${escapeHTML(t.type)}${t.item ? ` (${escapeHTML(t.item)})` : ''}</strong>
+                        <div style="font-size:12px; color:#999; margin-top:4px;">${escapeHTML(t.time)}</div>
                     </div>
                     <div style="display:flex; align-items:center; gap:12px;">
                         <span class="tx-amount ${t.amount >= 0 ? 'tx-plus' : 'tx-minus'}">${t.amount >= 0 ? '+' : ''}${t.amount}</span>
@@ -114,9 +114,9 @@ async function renderWallet() {
                     </div>
                 </div>
                 <div class="wallet-detail-expanded-panel">
-                    📌 交易項目：${t.item || '點數變動'}<br>
+                    📌 交易項目：${escapeHTML(t.item || '點數變動')}<br>
                     💰 變動金額：${t.amount} Points<br>
-                    🕒 確切時間：${t.time}
+                    🕒 確切時間：${escapeHTML(t.time)}
                 </div>
             </div>`).join('') || "<p class='no-data-msg'>目前尚無交易明細</p>";
     }

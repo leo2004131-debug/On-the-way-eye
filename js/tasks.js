@@ -45,12 +45,12 @@ async function renderManagementCenter() {
             return `
                 <li class="task-card" style="border-left:5px solid ${color};">
                     <div class="task-info">
-                        <b>${t.title}</b> ${rateBtn}<br>
+                        <b>${escapeHTML(t.title)}</b> ${rateBtn}<br>
                         <small>狀態: <span style="color:${color}; font-weight:bold;">${statusCN}</span></small>
                     </div>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <div class="reward-tag">${t.reward}點</div>
-                        <button onclick="deletePublishedTask('${t.id}', '${t.title}')" class="delete-task-btn" title="刪除任務">🗑️</button>
+                        <button onclick="deletePublishedTask('${t.id}', '${escapeHTML(t.title)}')" class="delete-task-btn" title="刪除任務">🗑️</button>
                     </div>
                 </li>`;
         }).join('') || "<p class='no-data-msg'>尚無發布紀錄</p>";
@@ -75,11 +75,11 @@ async function renderManagementCenter() {
                 buttonHtml = `<div style="margin-top:12px; text-align:right; color:#777; font-size:0.8rem;">💡 抵達目的地後將自動彈出回報視窗（請至地圖大廳）</div>`;
             }
 
-            const description = t.desc || '（發案人未填寫備註說明）';
+            const description = t.desc ? escapeHTML(t.desc) : '（發案人未填寫備註說明）';
             return `
                 <div class="task-card-accepted" style="border-left:5px solid ${color};">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                        <h3 style="margin:0; font-size:16px; font-weight:bold; color:#333; max-width:70%;">${t.title}</h3>
+                        <h3 style="margin:0; font-size:16px; font-weight:bold; color:#333; max-width:70%;">${escapeHTML(t.title)}</h3>
                         <span style="color:${color}; font-weight:bold; font-size:14px;">(${statusCN})</span>
                     </div>
                     <div style="font-size:14px; margin-bottom:8px; color:#555;">
@@ -100,14 +100,14 @@ async function renderManagementCenter() {
         const photoHtml = t.reportImage
             ? `<div style="margin:12px 0;">
                    <span style="font-size:13px; color:#ff6600; font-weight:bold; display:block; margin-bottom:5px;">📸 現場浮水印相片：</span>
-                   <img src="${t.reportImage}" alt="現場回報照片" style="max-width:100%; border:2px solid #ff6600; border-radius:8px; cursor:pointer;" onclick="window.open(this.src)">
+                   <img src="${escapeHTML(t.reportImage)}" alt="現場回報照片" style="max-width:100%; border:2px solid #ff6600; border-radius:8px; cursor:pointer;" onclick="window.open(this.src)">
                    <small style="color:#777; display:block; margin-top:4px;">(點擊圖片可放大檢視)</small>
                </div>`
             : `<div style="margin:12px 0; color:#999; font-size:13px;">🚫 未附帶現場相片紀錄</div>`;
 
         return `
             <div class="review-card" style="border-left:5px solid #ff6600; margin-bottom:15px;">
-                <h3 style="margin:0 0 5px 0; font-size:1.1rem; font-weight:bold;">任務：${t.title}</h3>
+                <h3 style="margin:0 0 5px 0; font-size:1.1rem; font-weight:bold;">任務：${escapeHTML(t.title)}</h3>
                 <div style="color:#28a745; font-size:0.85rem; font-weight:500; margin-bottom:8px;">✓ 座標已驗證 (100m 範圍內)</div>
                 <div style="margin:8px 0; font-size:0.9rem;">
                     <strong>任務報酬：</strong> <span style="color:#ff6600; font-weight:bold; font-size:1rem;">${t.reward || 0} 點</span>

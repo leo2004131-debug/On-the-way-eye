@@ -2,6 +2,17 @@
 
 let currentUser = null;
 
+function escapeHTML(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag]));
+}
+
 /* 登入狀態存於 sessionStorage：同一瀏覽器工作階段內換頁免重登，
    關閉瀏覽器後失效，重開 index 一律回到登入頁 */
 function loadCurrentUser() {
@@ -56,7 +67,7 @@ function addTransaction(type, amount, item) {
             amount: amount,
             item: item || '',
             time: getTimeStr(),
-            ts: Date.now()
+            ts: firebase.firestore.FieldValue.serverTimestamp()
         });
 }
 
@@ -77,6 +88,6 @@ function updateHeaderAvatar() {
     const el = document.getElementById('top-left-avatar-btn');
     if (!el || !currentUser) return;
     el.innerHTML = currentUser.avatar
-        ? `<img src="${currentUser.avatar}" alt="頭像">`
+        ? `<img src="${escapeHTML(currentUser.avatar)}" alt="頭像">`
         : '<span>👤</span>';
 }

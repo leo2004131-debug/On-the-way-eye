@@ -1,3 +1,6 @@
+:root {
+    --neon-cyan: var(--neon-cyan);
+}
 /* ============================================================
    《順路眼》整合版共用樣式
    統整自「專題製作網頁」與「報廢專題」兩版 CSS
@@ -273,7 +276,7 @@ main {
 .back-btn {
     background: none;
     border: none;
-    color: #00f2ff;
+    color: var(--neon-cyan);
     font-size: 1.5rem;
     cursor: pointer;
 }
@@ -307,7 +310,7 @@ main {
 .avatar-large *, .camera-badge * { pointer-events: none; }
 
 .neon-border {
-    border: 2px solid #00f2ff;
+    border: 2px solid var(--neon-cyan);
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
 }
 
@@ -315,7 +318,7 @@ main {
     position: absolute;
     bottom: 0;
     right: 0;
-    background: #00f2ff;
+    background: var(--neon-cyan);
     width: 25px;
     height: 25px;
     border-radius: 50%;
@@ -328,7 +331,7 @@ main {
 }
 
 .avatar-label {
-    color: #00f2ff;
+    color: var(--neon-cyan);
     font-size: 0.8rem;
     margin-top: 12px;
 }
@@ -346,7 +349,7 @@ main {
 }
 
 .neon-input-group:focus-within {
-    border-color: #00f2ff;
+    border-color: var(--neon-cyan);
     box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
 }
 
@@ -362,7 +365,7 @@ main {
 .reg-main-btn {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(90deg, #00f2ff, #ff00ff);
+    background: linear-gradient(90deg, var(--neon-cyan), #ff00ff);
     color: white;
     border: none;
     border-radius: 50px;
