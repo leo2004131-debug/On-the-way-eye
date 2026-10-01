@@ -102,7 +102,7 @@ function showToast(message, duration = 3000) {
 }
 
 const swalApp = typeof Swal !== 'undefined' ? Swal.mixin({
-    background: '#1A1A1A', color: '#fff', confirmButtonColor: 'var(--neon-cyan)', cancelButtonColor: '#d33', confirmButtonText: '確定', cancelButtonText: '取消', customClass: { confirmButton: 'swal-neon-btn' }
+    background: '#fff', color: '#333', confirmButtonColor: 'var(--primary-color)', cancelButtonColor: '#d33', confirmButtonText: '確定', cancelButtonText: '取消', customClass: { confirmButton: 'swal-primary-btn' }
 }) : null;
 window.appAlert = function(title, icon = 'info') {
     return swalApp ? swalApp.fire(title, '', icon) : alert(title);
