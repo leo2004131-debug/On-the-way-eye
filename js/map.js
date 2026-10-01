@@ -265,7 +265,7 @@ async function switchRole(r, { initial = false } = {}) {
 // --- 5 公里鄰近模式開關 ---
 async function toggleNearbyMode() {
     if (!nearbyOnly && !currentGps) {
-        return alert('請先點擊「開始定位」，才能開啟 5 公里範圍模式！');
+        { appAlert('請先點擊「開始定位」，才能開啟 5 公里範圍模式！', 'error'); return; }
     }
 
     nearbyOnly = !nearbyOnly;
@@ -303,8 +303,8 @@ function updateNearbyCircle() {
 function toggleGps() {
     if (gpsWatchId !== null) { stopGps(); return; }
 
-    if (!navigator.geolocation) return alert('此裝置不支援 GPS 定位。');
-    if (!isTrackingEnabled()) return alert('您已在「個人中心」關閉定位追蹤，請先開啟。');
+    if (!navigator.geolocation) { appAlert('此裝置不支援 GPS 定位。', 'error'); return; }
+    if (!isTrackingEnabled()) { appAlert('您已在「個人中心」關閉定位追蹤，請先開啟。', 'error'); return; }
 
     document.getElementById('locate-btn').innerText = '🛰️ 定位中...';
     gpsWatchId = navigator.geolocation.watchPosition(onGpsUpdate, onGpsError, {
@@ -336,8 +336,13 @@ function onGpsUpdate(pos) {
 }
 
 function onGpsError(err) {
-    stopGps();
-    alert('GPS 獲取失敗：' + err.message + '\n(可改用畫面右側方向鍵模擬移動)');
+    console.warn('GPS Error:', err);
+    if (err.code === 1) { // PERMISSION_DENIED
+        const overlay = document.getElementById('gps-error-overlay');
+        if (overlay) overlay.style.display = 'flex';
+    } else {
+        appAlert('無法取得您的位置，請確認 GPS 已開啟。', 'info');
+    }
 }
 
 function stopGps() {
@@ -356,8 +361,8 @@ function setGpsStatus(connected) {
 
 // --- 模擬移動（測試抵達用方向鍵） ---
 function moveUser(dir) {
-    if (!isTrackingEnabled()) return alert('請先在「個人中心」開啟定位追蹤！');
-    if (!currentGps) return alert('請先點擊「開始定位」！');
+    if (!isTrackingEnabled()) { appAlert('請先在「個人中心」開啟定位追蹤！', 'error'); return; }
+    if (!currentGps) { appAlert('請先點擊「開始定位」！', 'error'); return; }
 
     const s = 0.0005;
     if (dir === 'up') currentGps.lat += s;
@@ -401,16 +406,16 @@ function showTaskDetail(t) {
 
 /* 接單改用 Firestore Transaction：多人同時搶單只會有一人成功（規格書任務 3-2） */
 async function acceptTask() {
-    if (!currentGps) return alert('請先開始定位，才能接受任務！');
+    if (!currentGps) { appAlert('請先開始定位，才能接受任務！', 'error'); return; }
 
     // 禁止接受自己發布的任務
     if (selectedTask.initiator === currentUser.email) {
-        return alert('❌ 不能接受自己發布的任務！');
+        { appAlert('❌ 不能接受自己發布的任務！', 'error'); return; }
     }
     if (nearbyOnly) {
         const dist = calculateDistance(currentGps.lat, currentGps.lng, selectedTask.lat, selectedTask.lng);
         if (dist > NEARBY_RADIUS) {
-            return alert(`❌ 此任務距離您約 ${(dist / 1000).toFixed(1)} 公里，超出 5 公里範圍，無法接受！\n（可關閉 5km 模式以接受遠處任務）`);
+            { appAlert(`❌ 此任務距離您約 ${(dist / 1000).toFixed(1)} 公里，超出 5 公里範圍，無法接受！\n（可關閉 5km 模式以接受遠處任務）`, 'error'); return; }
         }
     }
 
@@ -426,9 +431,9 @@ async function acceptTask() {
         closeModal();
         map.flyTo([selectedTask.lat, selectedTask.lng], 17);
         await filterAndRenderTasks('');
-        alert('✅ 接單成功！請前往現場。');
+        showToast('✅ 接單成功！請前往現場。');
     } catch (err) {
-        alert('❌ 接單失敗：' + err.message);
+        appAlert('❌ 接單失敗：' + err.message, 'error');
         closeModal();
         await filterAndRenderTasks('');
     }
@@ -457,10 +462,10 @@ async function submitNewTask() {
     const la = document.getElementById('pub-lat').value;
     const ln = document.getElementById('pub-lng').value;
 
-    if (!t || !r || !la) return alert('資訊不完整！請填寫標題、點數並在地圖選取位置。');
+    if (!t || !r || !la) { appAlert('資訊不完整！請填寫標題、點數並在地圖選取位置。', 'error'); return; }
     const reward = parseInt(r, 10);
-    if (isNaN(reward) || reward <= 0) return alert('懸賞點數必須大於 0！');
-    if (currentUser.balance < 10) return alert('餘額不足！發布任務需要 10 點。');
+    if (isNaN(reward) || reward <= 0) { appAlert('懸賞點數必須大於 0！', 'error'); return; }
+    if (currentUser.balance < 10) { appAlert('餘額不足！發布任務需要 10 點。', 'error'); return; }
 
     try {
         const userRef = db.collection('users').doc(currentUser.email);
@@ -497,10 +502,10 @@ async function submitNewTask() {
         await refreshUserFromDB();
         filterAndRenderTasks('');
         closePublishModal();
-        alert('🎉 任務發布成功！已扣除 10 點。');
+        showToast('🎉 任務發布成功！已扣除 10 點。');
     } catch (err) {
         console.error('發布失敗:', err);
-        alert('發布失敗：' + err.message);
+        appAlert('發布失敗：' + err.message, 'error');
     }
 }
 
@@ -563,12 +568,12 @@ async function handlePhoto(e) {
             reportedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert('🎉 任務回報成功！\n已完成照片壓縮並壓製防偽浮水印。');
+        appAlert('🎉 任務回報成功！\n已完成照片壓縮並壓製防偽浮水印。', 'success');
         activeTask = null;
         filterAndRenderTasks('');
     } catch (err) {
         console.error('回報失敗:', err);
-        alert('❌ 回報失敗：' + err.message);
+        appAlert('❌ 回報失敗：' + err.message, 'error');
     } finally {
         closeArrivalAlert();
         e.target.value = '';

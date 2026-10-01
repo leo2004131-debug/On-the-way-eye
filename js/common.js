@@ -53,10 +53,12 @@ async function refreshUserFromDB() {
 }
 
 function handleLogout() {
-    if (confirm('確定要登出嗎？')) {
-        sessionStorage.removeItem('currentUser');
-        location.href = 'index.html';
-    }
+    return (async () => {
+        if (await appConfirm('確定要登出嗎？')) {
+            sessionStorage.removeItem('currentUser');
+            location.href = 'index.html';
+        }
+    })();
 }
 
 /* 交易紀錄統一寫入：ts 為數字時間戳，修正原本用中文時間字串排序錯亂的 bug */
@@ -91,3 +93,24 @@ function updateHeaderAvatar() {
         ? `<img src="${escapeHTML(currentUser.avatar)}" alt="頭像">`
         : '<span>👤</span>';
 }
+
+function showToast(message, duration = 3000) {
+    let container = document.getElementById('toast-container');
+    if (!container) { container = document.createElement('div'); container.id = 'toast-container'; document.body.appendChild(container); }
+    const toast = document.createElement('div'); toast.className = 'toast-msg'; toast.innerText = message; container.appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'toastFadeOut 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, duration);
+}
+
+const swalApp = typeof Swal !== 'undefined' ? Swal.mixin({
+    background: '#1A1A1A', color: '#fff', confirmButtonColor: 'var(--neon-cyan)', cancelButtonColor: '#d33', confirmButtonText: '確定', cancelButtonText: '取消', customClass: { confirmButton: 'swal-neon-btn' }
+}) : null;
+window.appAlert = function(title, icon = 'info') {
+    return swalApp ? swalApp.fire(title, '', icon) : alert(title);
+};
+window.appConfirm = async function(title, text = '') {
+    return swalApp ? (await swalApp.fire({ title, text, icon: 'warning', showCancelButton: true })).isConfirmed : confirm(title + (text ? '\n' + text : ''));
+};
+window.appPrompt = async function(title) {
+    if (swalApp) { const res = await swalApp.fire({ title, input: 'text', showCancelButton: true }); return res.isConfirmed ? res.value : null; }
+    return prompt(title);
+};

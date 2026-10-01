@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function addPoints(amt) {
     if (!currentUser) return;
     const amount = parseInt(amt, 10);
-    if (isNaN(amount) || amount <= 0) return alert('請輸入有效的儲值金額！');
+    if (isNaN(amount) || amount <= 0) { appAlert('請輸入有效的儲值金額！', 'error'); return; }
 
     try {
         const userRef = db.collection('users').doc(currentUser.email);
@@ -29,15 +29,15 @@ async function addPoints(amt) {
         // Transaction 成功後同步本地狀態
         await refreshUserFromDB();
         renderWallet();
-        alert('儲值成功！');
+        showToast('💰 儲值成功！');
     } catch (err) {
-        alert('儲值失敗：' + err.message);
+        appAlert('儲值失敗：' + err.message, 'error');
     }
 }
 
 async function exchangeProduct(name, price) {
     if (!currentUser) return;
-    if (currentUser.balance < price) return alert('點數不足！');
+    if (currentUser.balance < price) { appAlert('點數不足！', 'error'); return; }
 
     try {
         const userRef = db.collection('users').doc(currentUser.email);
@@ -56,9 +56,9 @@ async function exchangeProduct(name, price) {
         });
         await refreshUserFromDB();
         renderWallet();
-        alert(`🎉 兌換成功！已兌換「${name}」`);
+        showToast(`🎉 已兌換「${name}」`);
     } catch (err) {
-        alert('兌換失敗：' + err.message);
+        appAlert('兌換失敗：' + err.message, 'error');
     }
 }
 

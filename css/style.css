@@ -1,5 +1,5 @@
 :root {
-    --neon-cyan: var(--neon-cyan);
+    --neon-cyan: #00f2ff;
 }
 /* ============================================================
    《順路眼》整合版共用樣式
@@ -1593,3 +1593,12 @@ input:checked + .slider:before { transform: translateX(22px); }
         scroll-behavior: auto !important;
     }
 }
+
+#toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast-msg { background: rgba(30,30,30,0.95); color: #fff; padding: 12px 24px; border-radius: 25px; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid var(--neon-cyan); animation: toastFadeIn 0.3s ease forwards; white-space: nowrap; }
+@keyframes toastFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+
+/* SweetAlert Neon Styles */
+.swal-neon-btn { color: #000 !important; font-weight: bold !important; }
+div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm { background-color: var(--neon-cyan) !important; }

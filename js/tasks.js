@@ -72,7 +72,14 @@ async function renderManagementCenter() {
                        </div>`
                     : `<div style="text-align:right; margin-top:8px; color:#777; font-size:12px; font-weight:bold;">✓ 已給予發案人 ${t.ratingToPoster}★ 評價</div>`;
             } else {
-                buttonHtml = `<div style="margin-top:12px; text-align:right; color:#777; font-size:0.8rem;">💡 抵達目的地後將自動彈出回報視窗（請至地圖大廳）</div>`;
+                buttonHtml = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+                    <button onclick="abandonTask('${t.id}')" class="mini-rate-btn" style="background:#f44336; border-color:#f44336; color:#fff;">放棄接單</button>
+                    <div style="color:#777; font-size:0.8rem; text-align:right;">💡抵達目的地後自動彈出回報</div>
+                </div>`;
+                if (t.rejectReason) {
+                    buttonHtml = `<p style="color:#f44336; font-size:13px; font-weight:bold; margin-bottom:8px;">⚠️ 委託人退回原因：${escapeHTML(t.rejectReason)}</p>` + buttonHtml;
+                }
             }
 
             const description = t.desc ? escapeHTML(t.desc) : '（發案人未填寫備註說明）';
@@ -113,15 +120,20 @@ async function renderManagementCenter() {
                     <strong>任務報酬：</strong> <span style="color:#ff6600; font-weight:bold; font-size:1rem;">${t.reward || 0} 點</span>
                 </div>
                 ${photoHtml}
-                <button class="approve-btn" onclick="completeTask('${t.id}')" style="width:100%; margin-top:12px;">
-                    確認證據無誤，核准發款
-                </button>
+                <div style="display:flex; gap:10px; margin-top:12px;">
+                    <button class="approve-btn" onclick="rejectTask('${t.id}')" style="flex:1; background:#f44336; color:#fff; border:1px solid #f44336;">
+                        退回重拍
+                    </button>
+                    <button class="approve-btn" onclick="completeTask('${t.id}')" style="flex:2;">
+                        核准發款
+                    </button>
+                </div>
             </div>`;
     }).join('') || "<p class='no-data-msg'>目前無待審核案件</p>");
 }
 
 async function deletePublishedTask(id, title) {
-    if (!confirm(`確定要刪除「${title}」嗎？\n(此操作無法復原，發布時扣除的 10 點將退還)`)) return;
+    if (!await appConfirm(`確定要刪除「${title}」嗎？\n(此操作無法復原，發布時扣除的 10 點將退還)`)) return;
     try {
         const taskRef = db.collection('tasks').doc(id);
         const userRef = db.collection('users').doc(currentUser.email);
@@ -155,10 +167,10 @@ async function deletePublishedTask(id, title) {
         });
 
         await refreshUserFromDB();
-        alert('🗑️ 任務已刪除，10 點已退還！');
+        appAlert('🗑️ 任務已刪除，10 點已退還！', 'success');
         renderManagementCenter();
     } catch (e) {
-        alert('刪除失敗：' + e.message);
+        appAlert('刪除失敗：' + e.message, 'error');
     }
 }
 
@@ -193,13 +205,13 @@ async function completeTask(taskId) {
             });
         });
 
-        alert('✅ 撥款結案成功！\n點數已發送至代理人錢包。');
+        appAlert('✅ 撥款結案成功！\n點數已發送至代理人錢包。', 'success');
         renderManagementCenter();
         // 撥款後自動跳出評價視窗
         setTimeout(() => openReviewModal(taskId, 'poster'), 300);
     } catch (err) {
         console.error('撥款失敗:', err);
-        alert('❌ 撥款失敗：' + err.message);
+        appAlert('❌ 撥款失敗：' + err.message, 'error');
     }
 }
 
@@ -229,7 +241,7 @@ function resetStars() {
 }
 
 async function submitReviewData() {
-    if (selectedRatingValue === 0) return alert('請點選星星評分！');
+    if (selectedRatingValue === 0) { appAlert('請點選星星評分！', 'error'); return; }
     const comment = document.getElementById('review-text').value.trim();
 
     try {
@@ -267,11 +279,41 @@ async function submitReviewData() {
             }
         }
 
-        alert('🎉 評價成功！已同步至對方的評價牆。');
+        appAlert('🎉 評價成功！已同步至對方的評價牆。', 'success');
         closeReviewModal();
         renderManagementCenter();
     } catch (err) {
         console.error('評價失敗:', err);
-        alert('評價失敗：' + err.message);
+        appAlert('評價失敗：' + err.message, 'error');
+    }
+}
+
+async function abandonTask(taskId) {
+    if (!await appConfirm('確定要放棄此任務嗎？放棄後將重新開放給其他人接單。')) return;
+    try {
+        await db.collection('tasks').doc(taskId).update({
+            status: 'available',
+            handler: firebase.firestore.FieldValue.delete()
+        });
+        showToast('已放棄任務');
+        if (typeof loadMyTasks === 'function') await loadMyTasks();
+    } catch (err) {
+        appAlert('操作失敗：' + err.message, 'error');
+    }
+}
+
+async function rejectTask(taskId) {
+    const reason = await appPrompt('請輸入退回原因（將顯示給接案者）：');
+    if (reason === null) return;
+    try {
+        await db.collection('tasks').doc(taskId).update({
+            status: 'ongoing',
+            reportImage: firebase.firestore.FieldValue.delete(),
+            rejectReason: reason || '不符合要求'
+        });
+        showToast('已將任務退回給接案者重拍');
+        if (typeof loadMyTasks === 'function') await loadMyTasks();
+    } catch (err) {
+        appAlert('操作失敗：' + err.message, 'error');
     }
 }

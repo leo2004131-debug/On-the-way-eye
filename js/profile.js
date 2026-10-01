@@ -36,13 +36,13 @@ function handleChangeAvatar(e) {
             saveCurrentUser();
             updateProfileAvatarDisplay();
             updateHeaderAvatar();
-            alert('頭像更新成功！');
+            appAlert('頭像更新成功！', 'success');
         } catch (err) {
-            alert('更新失敗：' + err.message);
+            appAlert('更新失敗：' + err.message, 'error');
         }
     };
     fr.onerror = () => {
-        alert('❌ 圖片讀取失敗，請重新選擇檔案');
+        appAlert('❌ 圖片讀取失敗，請重新選擇檔案', 'error');
     };
     if (e.target.files[0]) fr.readAsDataURL(e.target.files[0]);
 }
@@ -51,7 +51,7 @@ function handleChangeAvatar(e) {
 async function handleChangePassword() {
     const op = document.getElementById('change-old-pass').value;
     const np = document.getElementById('change-new-pass').value;
-    if (!np) return alert('請輸入新密碼！');
+    if (!np) { appAlert('請輸入新密碼！', 'error'); return; }
 
     if (currentUser && op === currentUser.pass) {
         try {
@@ -60,12 +60,12 @@ async function handleChangePassword() {
             saveCurrentUser();
             document.getElementById('change-old-pass').value = '';
             document.getElementById('change-new-pass').value = '';
-            alert('密碼修改成功！');
+            appAlert('密碼修改成功！', 'success');
         } catch (err) {
-            alert('修改失敗：' + err.message);
+            appAlert('修改失敗：' + err.message, 'error');
         }
     } else {
-        alert('舊密碼錯誤');
+        appAlert('舊密碼錯誤', 'error');
     }
 }
 
