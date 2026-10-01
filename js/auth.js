@@ -83,6 +83,9 @@ async function handleRegister() {
 
     if (!nick || !email || !pass) return alert('請填寫完整資訊！');
     if (pass !== confirmPass) return alert('兩次密碼輸入不一致！');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return alert('請輸入有效的電子郵件格式！');
+    if (pass.length < 6) return alert('密碼至少需要 6 個字元！');
 
     // 防禦：Base64 頭像太大會讓 Firestore 文件超過上限
     let finalAvatar = userAvatarData;

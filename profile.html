@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>順路眼 - 個人中心</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
     <link rel="stylesheet" href="css/style.css">
@@ -12,7 +12,7 @@
 <body>
     <div class="app-container">
         <header>
-            <div id="top-left-avatar-btn" onclick="location.href='profile.html'"><span>👤</span></div>
+            <a id="top-left-avatar-btn" href="profile.html" aria-label="個人中心"><span>👤</span></a>
             <h1>個人中心</h1>
         </header>
 
@@ -54,8 +54,10 @@
                     <span class="accordion-arrow">▼</span>
                 </div>
                 <div class="accordion-content">
+                    <label for="change-old-pass" class="sr-only">舊密碼</label>
                     <input type="password" id="change-old-pass" placeholder="舊密碼">
-                    <input type="password" id="change-new-pass" placeholder="新密碼">
+                    <label for="change-new-pass" class="sr-only">新密碼</label>
+                    <input type="password" id="change-new-pass" placeholder="新密碼" minlength="6">
                     <button type="button" class="approve-btn" onclick="handleChangePassword()" style="width: 100%; margin-top: 4px;">修改密碼</button>
                 </div>
             </div>

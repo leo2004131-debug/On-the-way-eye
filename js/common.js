@@ -23,7 +23,8 @@ function requireLogin() {
 }
 
 function saveCurrentUser() {
-    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+    const { pass, ...safeUser } = currentUser;
+    sessionStorage.setItem('currentUser', JSON.stringify(safeUser));
 }
 
 /* 換頁後從 Firestore 重新同步餘額與頭像，避免本機快取過期 */

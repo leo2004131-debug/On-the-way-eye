@@ -237,7 +237,7 @@ async function filterAndRenderTasks(kw, { autoFit = false, flyToOngoing = false 
 }
 
 // --- 角色切換（修正原版引用不存在的 main-fab、靠 400ms 輪詢補救的 bug） ---
-function switchRole(r, { initial = false } = {}) {
+async function switchRole(r, { initial = false } = {}) {
     currentRole = r;
     const container = document.getElementById('role-toggle-container');
     const publishBtn = document.getElementById('publish-task-btn');
@@ -256,14 +256,14 @@ function switchRole(r, { initial = false } = {}) {
     document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(r === 'recipient' ? 'btn-role-recipient' : 'btn-role-requester').classList.add('active');
 
-    filterAndRenderTasks(document.getElementById('search-input').value.trim(), {
+    await filterAndRenderTasks(document.getElementById('search-input').value.trim(), {
         autoFit: initial,
         flyToOngoing: initial
     });
 }
 
 // --- 5 公里鄰近模式開關 ---
-function toggleNearbyMode() {
+async function toggleNearbyMode() {
     if (!nearbyOnly && !currentGps) {
         return alert('請先點擊「開始定位」，才能開啟 5 公里範圍模式！');
     }
@@ -275,7 +275,7 @@ function toggleNearbyMode() {
 
     updateNearbyCircle();
     if (nearbyOnly) map.flyTo([currentGps.lat, currentGps.lng], 13);
-    filterAndRenderTasks(document.getElementById('search-input').value.trim());
+    await filterAndRenderTasks(document.getElementById('search-input').value.trim());
 }
 
 /* 在地圖上畫出以自己為圓心的 5 公里範圍圈 */
@@ -425,12 +425,12 @@ async function acceptTask() {
         });
         closeModal();
         map.flyTo([selectedTask.lat, selectedTask.lng], 17);
-        filterAndRenderTasks('');
+        await filterAndRenderTasks('');
         alert('✅ 接單成功！請前往現場。');
     } catch (err) {
         alert('❌ 接單失敗：' + err.message);
         closeModal();
-        filterAndRenderTasks('');
+        await filterAndRenderTasks('');
     }
 }
 

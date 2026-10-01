@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>順路眼 - 完整交易明細</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
     <link rel="stylesheet" href="css/style.css">
@@ -12,14 +12,14 @@
 <body>
     <div class="app-container">
         <header>
-            <div id="top-left-avatar-btn" onclick="location.href='profile.html'"><span>👤</span></div>
+            <a id="top-left-avatar-btn" href="profile.html" aria-label="個人中心"><span>👤</span></a>
             <h1>完整交易明細</h1>
         </header>
 
         <!-- 3.1 完整交易明細 -->
         <main>
             <div class="history-header">
-                <button type="button" onclick="location.href='wallet.html'">⬅</button>
+                <button type="button" onclick="history.back()" aria-label="返回上一頁">❮</button>
                 <h2>全部交易紀錄</h2>
             </div>
             <div id="full-transaction-list" class="full-history-list"></div>

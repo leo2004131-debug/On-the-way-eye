@@ -220,7 +220,7 @@ function closeReviewModal() { document.getElementById('review-modal').style.disp
 function setTargetRating(rating) {
     selectedRatingValue = rating;
     document.querySelectorAll('.star-btn').forEach(star => {
-        star.style.color = (parseInt(star.dataset.value) <= rating) ? '#ff9800' : '#ccc';
+        star.style.color = (parseInt(star.dataset.value, 10) <= rating) ? '#ff9800' : '#ccc';
     });
 }
 

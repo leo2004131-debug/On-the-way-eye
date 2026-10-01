@@ -41,6 +41,9 @@ function handleChangeAvatar(e) {
             alert('更新失敗：' + err.message);
         }
     };
+    fr.onerror = () => {
+        alert('❌ 圖片讀取失敗，請重新選擇檔案');
+    };
     if (e.target.files[0]) fr.readAsDataURL(e.target.files[0]);
 }
 
@@ -73,23 +76,18 @@ function handlePrivacyChange() {
 }
 
 // --- 歷史評價 ---
-async function renderReviews() {
+function renderReviews() {
     const listEl = document.getElementById('review-list');
-    try {
-        const doc = await db.collection('users').doc(currentUser.email).get();
-        const rvs = (doc.exists && doc.data().reviews) || [];
-        listEl.innerHTML = rvs.map(r => `
-            <div class="review-card">
-                <div style="display:flex; justify-content:space-between;">
-                    <b>${r.stars}</b>
-                    <small style="color:#999;">${r.date}</small>
-                </div>
-                <p style="margin:5px 0; font-size:0.9rem;">${r.comment}</p>
-                <small style="color:var(--primary-color);">來自：${r.from || '匿名'}</small>
-            </div>`).join('') || "<p class='no-data-msg'>目前尚無評價</p>";
-    } catch (err) {
-        listEl.innerHTML = "<p class='no-data-msg'>評價載入失敗</p>";
-    }
+    const rvs = (currentUser && currentUser.reviews) || [];
+    listEl.innerHTML = rvs.map(r => `
+        <div class="review-card">
+            <div style="display:flex; justify-content:space-between;">
+                <b>${r.stars}</b>
+                <small style="color:#999;">${r.date}</small>
+            </div>
+            <p style="margin:5px 0; font-size:0.9rem;">${r.comment}</p>
+            <small style="color:var(--primary-color);">來自：${r.from || '匿名'}</small>
+        </div>`).join('') || "<p class='no-data-msg'>目前尚無評價</p>";
 }
 
 // --- 摺疊面板 ---
