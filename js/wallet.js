@@ -9,30 +9,55 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function addPoints(amt) {
     if (!currentUser) return;
-    currentUser.balance += parseInt(amt);
+    const amount = parseInt(amt, 10);
+    if (isNaN(amount) || amount <= 0) return alert('請輸入有效的儲值金額！');
+
     try {
-        await db.collection('users').doc(currentUser.email).update({ balance: currentUser.balance });
-        await addTransaction('儲值', parseInt(amt), `加點 +${amt}`);
-        saveCurrentUser();
+        const userRef = db.collection('users').doc(currentUser.email);
+        await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(userRef);
+            if (!doc.exists) throw new Error('使用者不存在');
+            const newBalance = (doc.data().balance || 0) + amount;
+            transaction.update(userRef, { balance: newBalance });
+
+            const logRef = userRef.collection('transactions').doc();
+            transaction.set(logRef, {
+                type: '儲值', amount: amount, item: `加點 +${amount}`,
+                time: getTimeStr(), ts: Date.now()
+            });
+        });
+        // Transaction 成功後同步本地狀態
+        await refreshUserFromDB();
         renderWallet();
         alert('儲值成功！');
     } catch (err) {
-        currentUser.balance -= parseInt(amt);
         alert('儲值失敗：' + err.message);
     }
 }
 
 async function exchangeProduct(name, price) {
+    if (!currentUser) return;
     if (currentUser.balance < price) return alert('點數不足！');
-    currentUser.balance -= price;
+
     try {
-        await db.collection('users').doc(currentUser.email).update({ balance: currentUser.balance });
-        await addTransaction('兌換', -price, name);
-        saveCurrentUser();
+        const userRef = db.collection('users').doc(currentUser.email);
+        await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(userRef);
+            if (!doc.exists) throw new Error('使用者不存在');
+            const currentBalance = doc.data().balance || 0;
+            if (currentBalance < price) throw new Error('點數不足！');
+            transaction.update(userRef, { balance: currentBalance - price });
+
+            const logRef = userRef.collection('transactions').doc();
+            transaction.set(logRef, {
+                type: '兌換', amount: -price, item: name,
+                time: getTimeStr(), ts: Date.now()
+            });
+        });
+        await refreshUserFromDB();
         renderWallet();
         alert(`🎉 兌換成功！已兌換「${name}」`);
     } catch (err) {
-        currentUser.balance += price;
         alert('兌換失敗：' + err.message);
     }
 }

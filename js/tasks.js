@@ -121,10 +121,41 @@ async function renderManagementCenter() {
 }
 
 async function deletePublishedTask(id, title) {
-    if (!confirm(`確定要刪除「${title}」嗎？\n(此操作無法復原)`)) return;
+    if (!confirm(`確定要刪除「${title}」嗎？\n(此操作無法復原，發布時扣除的 10 點將退還)`)) return;
     try {
-        await db.collection('tasks').doc(id).delete();
-        alert('🗑️ 任務已成功刪除！');
+        const taskRef = db.collection('tasks').doc(id);
+        const userRef = db.collection('users').doc(currentUser.email);
+
+        await db.runTransaction(async (transaction) => {
+            const taskDoc = await transaction.get(taskRef);
+            if (!taskDoc.exists) throw new Error('任務不存在');
+            const tData = taskDoc.data();
+
+            // 權限檢查：只有發起人可以刪除
+            if (tData.initiator !== currentUser.email) {
+                throw new Error('您不是此任務的發起人，無法刪除');
+            }
+            // 狀態檢查：只有待接單的任務可以刪除
+            if (tData.status !== 'available') {
+                throw new Error('此任務已被接單或完成，無法刪除');
+            }
+
+            const userDoc = await transaction.get(userRef);
+            if (!userDoc.exists) throw new Error('使用者不存在');
+
+            // 退還發布費用 10 點
+            transaction.update(userRef, { balance: (userDoc.data().balance || 0) + 10 });
+            transaction.delete(taskRef);
+
+            const logRef = userRef.collection('transactions').doc();
+            transaction.set(logRef, {
+                type: '退還發布費', amount: 10, item: `刪除任務：${title}`,
+                time: getTimeStr(), ts: Date.now()
+            });
+        });
+
+        await refreshUserFromDB();
+        alert('🗑️ 任務已刪除，10 點已退還！');
         renderManagementCenter();
     } catch (e) {
         alert('刪除失敗：' + e.message);

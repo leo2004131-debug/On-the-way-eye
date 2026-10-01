@@ -129,5 +129,8 @@ function previewAvatar(e) {
         ip.style.display = 'block';
         document.getElementById('default-avatar-icon').style.display = 'none';
     };
+    fr.onerror = () => {
+        alert('❌ 圖片讀取失敗，請重新選擇檔案');
+    };
     if (e.target.files[0]) fr.readAsDataURL(e.target.files[0]);
 }

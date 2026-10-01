@@ -403,7 +403,10 @@ function showTaskDetail(t) {
 async function acceptTask() {
     if (!currentGps) return alert('請先開始定位，才能接受任務！');
 
-    // 5km 模式開啟時，超出半徑的任務不能接
+    // 禁止接受自己發布的任務
+    if (selectedTask.initiator === currentUser.email) {
+        return alert('❌ 不能接受自己發布的任務！');
+    }
     if (nearbyOnly) {
         const dist = calculateDistance(currentGps.lat, currentGps.lng, selectedTask.lat, selectedTask.lng);
         if (dist > NEARBY_RADIUS) {
@@ -455,28 +458,43 @@ async function submitNewTask() {
     const ln = document.getElementById('pub-lng').value;
 
     if (!t || !r || !la) return alert('資訊不完整！請填寫標題、點數並在地圖選取位置。');
-    if (parseInt(r) <= 0) return alert('懸賞點數必須大於 0！');
+    const reward = parseInt(r, 10);
+    if (isNaN(reward) || reward <= 0) return alert('懸賞點數必須大於 0！');
     if (currentUser.balance < 10) return alert('餘額不足！發布任務需要 10 點。');
 
     try {
-        currentUser.balance -= 10;
-        await db.collection('users').doc(currentUser.email).update({ balance: currentUser.balance });
-        // 修正：原版扣點後沒有寫入交易紀錄
-        await addTransaction('發布任務', -10, `發布：${t}`);
+        const userRef = db.collection('users').doc(currentUser.email);
+        const newTaskRef = db.collection('tasks').doc(); // 預先產生 ID
 
-        await db.collection('tasks').add({
-            title: t,
-            reward: parseInt(r),
-            desc: document.getElementById('pub-desc').value,
-            lat: parseFloat(la),
-            lng: parseFloat(ln),
-            status: 'available',
-            initiator: currentUser.email,
-            handler: null,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        await db.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+            if (!userDoc.exists) throw new Error('使用者不存在');
+            const currentBalance = userDoc.data().balance || 0;
+            if (currentBalance < 10) throw new Error('餘額不足！發布任務需要 10 點。');
+
+            // 原子操作：扣點 + 記錄交易 + 新增任務
+            transaction.update(userRef, { balance: currentBalance - 10 });
+
+            const logRef = userRef.collection('transactions').doc();
+            transaction.set(logRef, {
+                type: '發布任務', amount: -10, item: `發布：${t}`,
+                time: getTimeStr(), ts: Date.now()
+            });
+
+            transaction.set(newTaskRef, {
+                title: t,
+                reward: reward,
+                desc: document.getElementById('pub-desc').value,
+                lat: parseFloat(la),
+                lng: parseFloat(ln),
+                status: 'available',
+                initiator: currentUser.email,
+                handler: null,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
         });
 
-        saveCurrentUser();
+        await refreshUserFromDB();
         filterAndRenderTasks('');
         closePublishModal();
         alert('🎉 任務發布成功！已扣除 10 點。');
@@ -534,6 +552,7 @@ async function handlePhoto(e) {
 
                     resolve(canvas.toDataURL('image/jpeg', 0.6));
                 };
+                img.onerror = () => reject(new Error('圖片載入失敗，請重新拍攝'));
             };
             reader.onerror = reject;
         });
