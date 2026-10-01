@@ -531,7 +531,7 @@ async function handlePhoto(e) {
                 img.src = event.target.result;
                 img.onload = () => {
                     let width = img.width, height = img.height;
-                    const maxSize = 1200;
+                    const maxSize = 800;
                     if (width > maxSize || height > maxSize) {
                         if (width > height) { height *= maxSize / width; width = maxSize; }
                         else { width *= maxSize / height; height = maxSize; }
@@ -555,7 +555,7 @@ async function handlePhoto(e) {
                     ctx.fillText(line2, canvas.width - ctx.measureText(line2).width - margin, canvas.height - (margin * 2));
                     if (line3) ctx.fillText(line3, canvas.width - ctx.measureText(line3).width - margin, canvas.height - margin);
 
-                    resolve(canvas.toDataURL('image/jpeg', 0.6));
+                    resolve(canvas.toDataURL('image/jpeg', 0.5));
                 };
                 img.onerror = () => reject(new Error('圖片載入失敗，請重新拍攝'));
             };

@@ -123,17 +123,16 @@ async function handleRegister() {
     }
 }
 
-function previewAvatar(e) {
-    const fr = new FileReader();
-    fr.onload = (ev) => {
-        userAvatarData = ev.target.result;
+async function previewAvatar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+        userAvatarData = await compressImage(file, 400, 400, 0.6);
         const ip = document.getElementById('avatar-img-preview');
         ip.src = userAvatarData;
         ip.style.display = 'block';
         document.getElementById('default-avatar-icon').style.display = 'none';
-    };
-    fr.onerror = () => {
-        appAlert('❌ 圖片讀取失敗，請重新選擇檔案', 'error');
-    };
-    if (e.target.files[0]) fr.readAsDataURL(e.target.files[0]);
+    } catch (err) {
+        appAlert('❌ ' + err.message, 'error');
+    }
 }

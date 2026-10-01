@@ -26,25 +26,20 @@ function triggerProfileAvatarPicker() {
     document.getElementById('profile-avatar-input').click();
 }
 
-function handleChangeAvatar(e) {
-    const fr = new FileReader();
-    fr.onload = async (ev) => {
-        const img = ev.target.result;
-        try {
-            await db.collection('users').doc(currentUser.email).update({ avatar: img });
-            currentUser.avatar = img;
-            saveCurrentUser();
-            updateProfileAvatarDisplay();
-            updateHeaderAvatar();
-            appAlert('頭像更新成功！', 'success');
-        } catch (err) {
-            appAlert('更新失敗：' + err.message, 'error');
-        }
-    };
-    fr.onerror = () => {
-        appAlert('❌ 圖片讀取失敗，請重新選擇檔案', 'error');
-    };
-    if (e.target.files[0]) fr.readAsDataURL(e.target.files[0]);
+async function handleChangeAvatar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+        const compressedImg = await compressImage(file, 400, 400, 0.6);
+        await db.collection('users').doc(currentUser.email).update({ avatar: compressedImg });
+        currentUser.avatar = compressedImg;
+        saveCurrentUser();
+        updateProfileAvatarDisplay();
+        updateHeaderAvatar();
+        appAlert('頭像更新成功！', 'success');
+    } catch (err) {
+        appAlert('操作失敗：' + err.message, 'error');
+    }
 }
 
 // --- 修改密碼 ---
