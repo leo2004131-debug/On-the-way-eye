@@ -1204,6 +1204,12 @@ main {
     padding: 25px;
     border-radius: 20px;
     margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .profile-main {
@@ -1211,6 +1217,7 @@ main {
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    width: 100%;
 }
 
 .profile-avatar-container {
@@ -1466,11 +1473,12 @@ input:checked + .slider:before { transform: translateX(22px); }
         gap: 18px;
     }
 
-    /* 錢包卡與個人卡置中限寬，避免整排拉滿 */
-    .wallet-card,
-    .profile-card { max-width: 600px; }
-
-    .wallet-card { margin-left: auto; margin-right: auto; }
+    /* 錢包卡置中限寬，避免整排拉滿 */
+    .wallet-card {
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
 
 /* ---------- 滑鼠裝置（電腦 / 觸控板）：補上 hover 回饋 ---------- */
