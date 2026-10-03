@@ -336,8 +336,8 @@ function onGpsUpdate(pos) {
     if (!userMarker) {
         const gpsIcon = L.divIcon({
             className: 'live-gps-dot',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
+            iconSize: [60, 60],
+            iconAnchor: [30, 30]
         });
         userMarker = L.marker([currentGps.lat, currentGps.lng], { icon: gpsIcon, zIndexOffset: 1000 }).addTo(map);
     } else {
