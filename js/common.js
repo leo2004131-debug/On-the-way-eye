@@ -1,5 +1,12 @@
 /* 《順路眼》共用邏輯：登入狀態、導覽、工具函式 */
 
+// 註冊 Service Worker（離線快取）
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+
 let currentUser = null;
 
 function compressImage(file, maxWidth, maxHeight, quality = 0.6) {
