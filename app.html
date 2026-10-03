@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>順路眼 NearPath - 大廳</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .spa-view { display: none; width: 100%; flex: 1; overflow-y: auto; flex-direction: column; }
+        .spa-view.active { display: flex; }
+        /* Override map specific flex issues */
+        #view-map { overflow: hidden; }
+        /* Clean up duplicate comments */
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <a id="top-left-avatar-btn" href="#" onclick="switchTab('profile'); return false;" aria-label="個人中心"><span>👤</span></a>
+            <h1 id="app-header-title">地圖大廳</h1>
+        </header>
+
+        <div id="view-map" class="spa-view active">
+            <section class="map-section">
+            <div id="map"></div>
+
+            <div class="map-header-controls">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="搜尋地標或地址..." autocomplete="off">
+                    <div id="search-suggestions" class="search-suggestions" style="display: none;"></div>
+                </div>
+                <div id="role-toggle-container" class="role-switch-container">
+                    <div class="role-switch-slider"></div>
+                    <button type="button" id="btn-role-recipient" class="role-btn active" onclick="switchRole('recipient')">接收人</button>
+                    <button type="button" id="btn-role-requester" class="role-btn" onclick="switchRole('requester')">委託人</button>
+                </div>
+                <div class="gps-status-bar">
+                    <span id="gps-dot" class="status-dot"></span>
+                    <span id="gps-text">GPS 未連接</span>
+                </div>
+            </div>
+
+            <div class="movement-controls">
+                <button type="button" class="move-btn" onclick="moveUser('up')">▲</button>
+                <div class="move-row">
+                    <button type="button" class="move-btn" onclick="moveUser('left')">◀</button>
+                    <button type="button" class="move-btn" onclick="moveUser('down')">▼</button>
+                    <button type="button" class="move-btn" onclick="moveUser('right')">▶</button>
+                </div>
+            </div>
+
+            <div id="picker-hint" class="picker-hint" style="display: none;">📍 請點擊地圖選擇任務地點...</div>
+
+            <button type="button" id="locate-btn" class="locate-btn" onclick="toggleGps()">🛰️ 開始定位</button>
+            <button type="button" id="nearby-btn" class="nearby-btn" onclick="toggleNearbyMode()">🌐 顯示全部任務</button>
+            <button type="button" id="publish-task-btn" style="display: none;" onclick="openPublishModal()">發布任務</button>
+        </section>
+        </div>
+        
+        <div id="view-tasks" class="spa-view">
+            <main>
+            <div class="task-tabs">
+                <button type="button" class="task-tab active" onclick="switchTaskSubTab('posted')">我發布的</button>
+                <button type="button" class="task-tab" onclick="switchTaskSubTab('accepted')">我接受的</button>
+                <button type="button" class="task-tab" onclick="switchTaskSubTab('review')">回報審核</button>
+            </div>
+            <div id="sub-posted" class="task-sub-view active"><ul class="task-list" id="my-posted-list"></ul></div>
+            <div id="sub-accepted" class="task-sub-view"><div id="my-accepted-list"></div></div>
+            <div id="sub-review" class="task-sub-view"></div>
+        </main>
+        </div>
+        
+        <div id="view-wallet" class="spa-view">
+            <main>
+            <div class="wallet-card">
+                <div class="wallet-label">當前餘額 (Points)</div>
+                <div class="wallet-balance"><span id="wallet-balance-val">0</span><span>點</span></div>
+            </div>
+
+            <div class="section-title">快速儲值</div>
+            <div class="topup-grid">
+                <button type="button" class="topup-btn" onclick="addPoints(100)">+ 100 點</button>
+                <button type="button" class="topup-btn" onclick="addPoints(500)">+ 500 點</button>
+                <button type="button" class="topup-btn" onclick="addPoints(1000)">+ 1000 點</button>
+            </div>
+
+            <div class="wallet-transaction-header">
+                <strong>交易紀錄</strong>
+                <a href="#" onclick="switchTab('history'); return false;">更多 <span style="font-size: 10px; color: #b5b5b5;">▶</span></a>
+            </div>
+            <div id="transaction-list" class="transaction-list"></div>
+
+            <div class="section-title">全家點數商城</div>
+            <div class="points-shop">
+                <div class="product-card">☕<div>全家大美式</div><div class="product-price">450點</div><button type="button" class="exchange-btn" onclick="exchangeProduct('全家大美式', 450)">立即兌換</button></div>
+                <div class="product-card">💳<div>全家50元卡</div><div class="product-price">500點</div><button type="button" class="exchange-btn" onclick="exchangeProduct('全家50元卡', 500)">立即兌換</button></div>
+                <div class="product-card">💳<div>全家100元卡</div><div class="product-price">1000點</div><button type="button" class="exchange-btn" onclick="exchangeProduct('全家100元卡', 1000)">立即兌換</button></div>
+                <div class="product-card">💳<div>全家200元卡</div><div class="product-price">2000點</div><button type="button" class="exchange-btn" onclick="exchangeProduct('全家200元卡', 2000)">立即兌換</button></div>
+                <div class="product-card">💳<div>全家500元卡</div><div class="product-price">5000點</div><button type="button" class="exchange-btn" onclick="exchangeProduct('全家500元卡', 5000)">立即兌換</button></div>
+                <div class="product-card">💳<div>全家1000元卡</div><div class="product-price">10000點</div><button type="button" class="exchange-btn" onclick="exchangeProduct('全家1000元卡', 10000)">立即兌換</button></div>
+            </div>
+        </main>
+        </div>
+        
+        <div id="view-profile" class="spa-view">
+            <main>
+            <div class="profile-card">
+                <div class="profile-main">
+                    <div class="profile-avatar-container" id="profile-avatar" onclick="triggerProfileAvatarPicker()" title="點擊更換頭像">👤</div>
+                    <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;" onchange="handleChangeAvatar(event)">
+                    <h2 id="profile-name">尚未登入</h2>
+                    <p class="credit-badge">信用等級：優良 (A級)</p>
+                </div>
+            </div>
+
+            <!-- 隱私與安全 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🔒 隱私與安全</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 15px; color: #333;">即時定位追蹤</strong>
+                            <div style="font-size: 12px; color: #777; margin-top: 2px;">控制地圖上傳位置</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-gps-tracking" checked onchange="handlePrivacyChange()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 帳號安全 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🔑 帳號安全</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <label for="change-old-pass" class="sr-only">舊密碼</label>
+                    <input type="password" id="change-old-pass" placeholder="舊密碼">
+                    <label for="change-new-pass" class="sr-only">新密碼</label>
+                    <input type="password" id="change-new-pass" placeholder="新密碼" minlength="6">
+                    <button type="button" class="approve-btn" onclick="handleChangePassword()" style="width: 100%; margin-top: 4px;">修改密碼</button>
+                </div>
+            </div>
+
+            <!-- 歷史評價 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>⭐ 歷史評價</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div id="review-list" class="review-list">
+                        <p class="no-data-msg">載入中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="menu-list">
+                <li class="logout-item" onclick="handleLogout()">登出帳號</li>
+            </ul>
+        </main>
+        </div>
+
+        <div id="view-history" class="spa-view">
+            <main>
+            <div class="history-header">
+                <button type="button" onclick="history.back()" aria-label="返回上一頁">❮</button>
+                <h2>全部交易紀錄</h2>
+            </div>
+            <div id="full-transaction-list" class="full-history-list"></div>
+        </main>
+        </div>
+
+        <!-- Modals -->
+        <!-- 1.0 地圖大廳 -->
+        
+
+        <!-- 抵達通知 -->
+        <div id="arrival-alert" class="arrival-alert" style="display: none;">
+            <div class="alert-content">
+                <span class="close-btn" onclick="closeArrivalAlert()">&times;</span>
+                <h3>🎉 您已抵達目的地！</h3>
+                <p>已進入任務範圍，請拍攝現場照片完成回報。</p>
+                <button type="button" class="report-now-btn" onclick="startReportFromAlert()">立即開始回報</button>
+            </div>
+        </div>
+
+        <!-- 任務詳情彈窗 -->
+        <div id="task-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title"></h3>
+                    <button type="button" class="close-modal" onclick="closeModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="task-detail-row"><span>懸賞點數：</span><span class="reward-value" id="modal-reward"></span></div>
+                    <p id="modal-desc" class="task-desc"></p>
+                    <div class="task-location">📍 <span id="modal-loc"></span></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="accept-btn" onclick="acceptTask()">接受任務</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 發布任務彈窗 -->
+        <div id="publish-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>發布任務</h3>
+                    <button type="button" class="close-modal" onclick="closePublishModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group"><label>任務標題</label><input id="pub-title" placeholder="例如：幫買大冰奶"></div>
+                    <div class="form-group"><label>懸賞點數</label><input id="pub-reward" type="number" placeholder="10 - 100"></div>
+                    <div class="form-group"><label>需求描述</label><textarea id="pub-desc" rows="3" placeholder="請填寫詳細需求..."></textarea></div>
+                    <div class="location-picker-box" onclick="enterMapPickerMode()">
+                        <p id="pub-loc-status">📍 點擊在地圖選取位置</p>
+                        <input type="hidden" id="pub-lat"><input type="hidden" id="pub-lng">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="accept-btn" onclick="submitNewTask()">正式發布</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 防偽相機：只允許即時拍攝（capture），不開放相簿 -->
+        <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="handlePhoto(event)">
+
+        
+<div id="gps-error-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:9999; color:var(--text-main); flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px; box-sizing:border-box;">
+        <div style="font-size:4rem; margin-bottom:20px;">📍</div>
+        <h2 style="color:var(--primary-color); margin-bottom:15px;">需要定位權限</h2>
+        <p style="font-size:1.1rem; line-height:1.5; color:#ccc; max-width:400px;">順路眼需要存取您的 GPS 位置來尋找附近的任務。<br><br>請前往手機或瀏覽器的「設定」中，允許本網站存取您的位置，然後重新整理頁面。</p>
+        <button onclick="location.reload()" style="margin-top:30px; padding:12px 24px; background:var(--primary-color); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:1.1rem; cursor:pointer;">重新整理</button>
+    </div>
+        <!-- 2.0 任務管理 -->
+        
+
+        <!-- 互相評價彈窗 -->
+        <div id="review-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content" style="text-align: center;">
+                <h3 id="review-modal-title" style="margin-top: 0;">給予對方評價</h3>
+                <div class="star-row">
+                    <span class="star-btn" data-value="1" onclick="setTargetRating(1)">★</span>
+                    <span class="star-btn" data-value="2" onclick="setTargetRating(2)">★</span>
+                    <span class="star-btn" data-value="3" onclick="setTargetRating(3)">★</span>
+                    <span class="star-btn" data-value="4" onclick="setTargetRating(4)">★</span>
+                    <span class="star-btn" data-value="5" onclick="setTargetRating(5)">★</span>
+                </div>
+                <textarea id="review-text" placeholder="寫點評語給對方吧（選填）..."></textarea>
+                <div class="review-modal-actions">
+                    <button type="button" class="cancel" onclick="closeReviewModal()">取消</button>
+                    <button type="button" class="submit" onclick="submitReviewData()">送出評價</button>
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- 3.0 點數錢包 -->
+        
+
+        
+        <!-- 4.0 個人中心 -->
+        
+
+        
+        <!-- 3.1 完整交易明細 -->
+        
+
+        
+
+        <nav class="bottom-nav">
+            <a href="#" onclick="switchTab('map'); return false;" class="nav-item active" id="nav-map"><span>📍</span><span>地圖</span></a>
+            <a href="#" onclick="switchTab('tasks'); return false;" class="nav-item" id="nav-tasks"><span>📋</span><span>任務</span></a>
+            <a href="#" onclick="switchTab('wallet'); return false;" class="nav-item" id="nav-wallet"><span>💰</span><span>錢包</span></a>
+            <a href="#" onclick="switchTab('profile'); return false;" class="nav-item" id="nav-profile"><span>👤</span><span>個人</span></a>
+        </nav>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         if (loadCurrentUser()) {
-            location.replace('map.html');
+            location.replace('app.html');
             return;
         }
         loginForm.addEventListener('submit', async (e) => {
@@ -41,7 +41,7 @@ async function handleLogin() {
         if (doc.exists && doc.data().pass === p) {
             currentUser = { email: u, ...doc.data() };
             saveCurrentUser();
-            location.href = 'map.html';
+            location.href = 'app.html';
         } else {
             appAlert('❌ 登入失敗：帳號或密碼錯誤！\n(請確認 Email 是否完全正確)', 'error');
         }
@@ -71,7 +71,7 @@ async function handleDevLogin() {
         currentUser = { email: 'dev', nickname: '開發者', pass: 'dev', balance: 9999, avatar: null, reviews: [] };
     }
     saveCurrentUser();
-    location.href = 'map.html';
+    location.href = 'app.html';
 }
 
 async function handleRegister() {
