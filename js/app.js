@@ -30,7 +30,7 @@ function switchTab(tabId) {
     
     // Map specific: invalidate size when showing map, so Leaflet renders correctly
     if (tabId === 'map' && typeof map !== 'undefined' && map !== null) {
-        setTimeout(() => map.invalidateSize(), 50);
+        requestAnimationFrame(() => map.invalidateSize());
     }
     
     // Refresh data dynamically when switching to specific tabs
@@ -85,3 +85,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof renderManagementCenter === 'function') renderManagementCenter();
     if (typeof renderWallet === 'function') renderWallet();
 });
+
+// Responsive map size handling
+if (typeof window.ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(() => {
+        if (typeof map !== 'undefined' && map !== null) {
+            requestAnimationFrame(() => map.invalidateSize());
+        }
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+        const mapContainer = document.getElementById('view-map');
+        if (mapContainer) ro.observe(mapContainer);
+    });
+}
