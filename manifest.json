@@ -1,0 +1,17 @@
+{
+  "name": "順路眼 - 行動接單助理",
+  "short_name": "順路眼",
+  "description": "即時 GPS 定位接單與地圖回報系統",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#222222",
+  "theme_color": "#ff9800",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
