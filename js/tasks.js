@@ -4,13 +4,6 @@ let currentReviewTaskId = '';
 let currentReviewUserRole = '';
 let selectedRatingValue = 0;
 
-document.addEventListener('DOMContentLoaded', async () => {
-    if (!requireLogin()) return;
-    updateHeaderAvatar();
-    await refreshUserFromDB();
-    renderManagementCenter();
-});
-
 function switchTaskSubTab(subId) {
     document.querySelectorAll('.task-sub-view').forEach(v => v.classList.remove('active'));
     const target = document.getElementById('sub-' + subId);

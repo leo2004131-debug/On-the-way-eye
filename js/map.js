@@ -14,17 +14,6 @@ let currentRole = 'recipient';
 const NEARBY_RADIUS = 5000; // 公尺
 let nearbyOnly = false;
 let nearbyCircle = null;
-
-document.addEventListener('DOMContentLoaded', async () => {
-    if (!requireLogin()) return;
-    updateHeaderAvatar();
-    const isFirstVisit = !sessionStorage.getItem('mapView');
-    initMap();
-    await refreshUserFromDB();
-    if (sessionStorage.getItem('gpsActive')) { toggleGps(true); }
-    switchRole('recipient', { initial: isFirstVisit });
-});
-
 // --- 地圖初始化 ---
 function initMap() {
     // 還原上次離開時的視角（避免切分頁回來時重複縮放）

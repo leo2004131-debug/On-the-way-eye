@@ -1,12 +1,5 @@
 /* 《順路眼》點數錢包（wallet.html 與 history.html 共用） */
 
-document.addEventListener('DOMContentLoaded', async () => {
-    if (!requireLogin()) return;
-    updateHeaderAvatar();
-    await refreshUserFromDB();
-    renderWallet();
-});
-
 async function addPoints(amt) {
     if (!currentUser) return;
     const amount = parseInt(amt, 10);

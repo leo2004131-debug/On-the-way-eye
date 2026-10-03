@@ -50,3 +50,38 @@ const originalBack = history.back;
 window.backToWallet = function() {
     switchTab('wallet');
 }
+
+// SPA Central Initialization
+document.addEventListener('DOMContentLoaded', async () => {
+    // Check if we are on the SPA page
+    if (!document.getElementById('app-header-title')) return;
+
+    if (typeof requireLogin === 'function' && !requireLogin()) return;
+    if (typeof updateHeaderAvatar === 'function') updateHeaderAvatar();
+    if (typeof refreshUserFromDB === 'function') await refreshUserFromDB();
+
+    // 1. Map Init
+    if (typeof initMap === 'function') {
+        const isFirstVisit = !sessionStorage.getItem('mapView');
+        initMap();
+        if (sessionStorage.getItem('gpsActive') && typeof toggleGps === 'function') {
+            toggleGps(true);
+        }
+        if (typeof switchRole === 'function') switchRole('recipient', { initial: isFirstVisit });
+    }
+
+    // 2. Profile Init
+    if (document.getElementById('profile-name') && typeof currentUser !== 'undefined' && currentUser) {
+        document.getElementById('profile-name').innerText = currentUser.nickname || '使用者';
+        if (typeof updateProfileAvatarDisplay === 'function') updateProfileAvatarDisplay();
+        if (typeof renderReviews === 'function') renderReviews();
+        const toggleGpsTracking = document.getElementById('toggle-gps-tracking');
+        if (toggleGpsTracking && typeof isTrackingEnabled === 'function') {
+            toggleGpsTracking.checked = isTrackingEnabled();
+        }
+    }
+
+    // 3. Tasks & Wallet Init
+    if (typeof renderManagementCenter === 'function') renderManagementCenter();
+    if (typeof renderWallet === 'function') renderWallet();
+});

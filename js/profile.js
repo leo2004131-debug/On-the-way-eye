@@ -1,18 +1,5 @@
 /* 《順路眼》個人中心（profile.html 專用） */
 
-document.addEventListener('DOMContentLoaded', async () => {
-    if (!requireLogin()) return;
-    updateHeaderAvatar();
-    await refreshUserFromDB();
-
-    document.getElementById('profile-name').innerText = currentUser.nickname || '使用者';
-    updateProfileAvatarDisplay();
-    renderReviews();
-
-    // 還原定位追蹤開關狀態
-    document.getElementById('toggle-gps-tracking').checked = isTrackingEnabled();
-});
-
 function updateProfileAvatarDisplay() {
     const pa = document.getElementById('profile-avatar');
     if (!pa) return;
