@@ -161,7 +161,7 @@ function selectSuggestion(lat, lng, name) {
         })
     }).addTo(map).bindPopup(name);
 
-    map.flyTo([lat, lng], 16, { duration: 1.5 });
+    map.flyTo([lat, lng], 16, { duration: 0.8 });
     landmarkMarker.openPopup();
 }
 
@@ -195,7 +195,7 @@ async function filterAndRenderTasks(kw, { autoFit = false, flyToOngoing = false 
                 }).addTo(map).on('click', () => showTaskDetail(ongoing));
                 taskMarkers.push(m);
                 if (flyToOngoing) {
-                    map.flyTo([ongoing.lat, ongoing.lng], 17, { duration: 1.5 });
+                    map.flyTo([ongoing.lat, ongoing.lng], 17, { duration: 0.8 });
                 }
                 activeTask = ongoing;
             } else {
@@ -284,7 +284,7 @@ async function toggleNearbyMode() {
     btn.classList.toggle('active', nearbyOnly);
 
     updateNearbyCircle();
-    if (nearbyOnly) map.flyTo([currentGps.lat, currentGps.lng], 13, { duration: 1.5 });
+    if (nearbyOnly) map.flyTo([currentGps.lat, currentGps.lng], 13, { duration: 0.8 });
     await filterAndRenderTasks(document.getElementById('search-input').value.trim());
 }
 
@@ -321,7 +321,7 @@ function toggleGps(autoResume = false) {
     sessionStorage.setItem('gpsActive', 'true');
     gpsWatchId = navigator.geolocation.watchPosition(onGpsUpdate, onGpsError, {
         enableHighAccuracy: true,
-        maximumAge: 5000,
+        maximumAge: 0,
         timeout: 15000
     });
 }
@@ -344,7 +344,7 @@ function onGpsUpdate(pos) {
         userMarker.setLatLng([currentGps.lat, currentGps.lng]);
     }
 
-    if (firstFix && !isGpsAutoResume) map.flyTo([currentGps.lat, currentGps.lng], 16, { duration: 1.5 });
+    if (firstFix && !isGpsAutoResume) map.flyTo([currentGps.lat, currentGps.lng], 16, { duration: 0.8 });
     updateNearbyCircle();
     checkArrival();
 }
@@ -449,7 +449,7 @@ async function acceptTask() {
             transaction.update(taskRef, { status: 'ongoing', handler: currentUser.email });
         });
         closeModal();
-        map.flyTo([selectedTask.lat, selectedTask.lng], 17, { duration: 1.5 });
+        map.flyTo([selectedTask.lat, selectedTask.lng], 17, { duration: 0.8 });
         await filterAndRenderTasks('');
         showToast('✅ 接單成功！請前往現場。');
     } catch (err) {

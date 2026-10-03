@@ -64,9 +64,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof initMap === 'function') {
         const isFirstVisit = !sessionStorage.getItem('mapView');
         initMap();
-        if (sessionStorage.getItem('gpsActive') && typeof toggleGps === 'function') {
-            toggleGps(true);
+        
+        // Auto-start GPS logic
+        if (typeof isTrackingEnabled === 'function' && isTrackingEnabled() && typeof toggleGps === 'function') {
+            if (isFirstVisit) {
+                // First visit this session: auto-start and fly to user
+                toggleGps(false);
+            } else if (sessionStorage.getItem('gpsActive')) {
+                // Refreshed page while GPS was active: resume tracking silently (no fly)
+                toggleGps(true);
+            }
         }
+        
         if (typeof switchRole === 'function') switchRole('recipient', { initial: isFirstVisit });
     }
 
