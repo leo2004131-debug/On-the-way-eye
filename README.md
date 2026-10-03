@@ -1,60 +1,70 @@
-# 《順路眼》LBS 微型勞動力平台 — 整合版
+# 《順路眼》LBS 行動接單助理 (On-the-way-eye)
 
-統整自「專題製作網頁」（新版單檔 App）與「報廢專題」（舊版原型）兩個資料夾，
-以新版功能為主體，拆分為多個獨立頁面，並修復原版已知 bug。
+這是一個以「行動裝置優先 (Mobile-First)」與「PWA (漸進式網頁應用程式)」為核心架構的 LBS (Location-Based Service) 任務接單平台。
 
-## 檔案結構
+本專案已從傳統多頁面網站重構為 **SPA (Single-Page Application 單頁應用程式)**，帶來如同原生 App 般「零延遲、不重整」的極致流暢體驗。
+
+## 🚀 核心特色與升級 (v2.0 SPA + PWA)
+
+1. **SPA 單頁架構 (`app.html`)**
+   - 捨棄了多個 HTML 頁面跳轉，所有的功能（地圖大廳、任務管理、點數錢包、個人中心）全部整合在單一的 `app.html`。
+   - 分頁切換瞬間完成，無須重新載入畫面。
+
+2. **真正的 PWA 應用程式**
+   - 支援加入手機桌面 (Add to Home Screen)，擁有專屬 App Icon，開啟後自動隱藏網址列，100% 全螢幕沉浸體驗。
+   - **自訂安裝引導 (`pwa-install.js`)**：主動攔截瀏覽器安裝事件，並針對 Android 與 iOS Safari 打造專屬的安裝提示框，大幅提升 App 下載率。
+   - **Service Worker (`sw.js`)**：完整的離線快取機制，秒開網頁。
+
+3. **地圖與 GPS 大幅優化**
+   - **超即時硬體追蹤**：強制要求手機 GPS 提供 `maximumAge: 0` 的絕對即時定位，走路步伐不延遲。
+   - **雷達波紋定位點**：捨棄死板的靜態圓點，改用純 CSS 刻劃的「透明邊框無限雷達波紋」，視覺效果媲美主流地圖 App，並修復了手機版 Chrome 的 GPU 切割破圖 (Clipping) 漏洞。
+   - **無縫地圖重繪**：導入 `ResizeObserver` 與 `requestAnimationFrame`，在電腦版切換分頁或拉動視窗時，地圖以 60fps 瞬間重繪，徹底消除破圖卡頓。
+
+4. **電腦版 (Desktop) 完美兼容**
+   - 響應式鎖定 `960px` 寬度的漂浮 App 模擬器外觀，符合手機操作直覺。
+   - 導入專屬透明懸浮捲軸 (6px) 與 `scrollbar-gutter: stable`，徹底解決 Windows/Chrome 電腦版在資料載入時捲軸出現所造成的「畫面左右跳動」Layout Shift 痛點。
+
+5. **系統安全與除錯**
+   - 全面引入 `escapeHTML()` 防止 XSS 攻擊。
+   - 原生的 `alert` 與 `confirm` 已全部升級為高質感的 **SweetAlert2**，且具備霓虹 Cyberpunk 視覺風格。
+   - 交易紀錄 (`wallet.js`) 與 GPS `switchRole` 潛在非同步 Bug 均已修復。
+
+## 📂 檔案結構
 
 ```
-順路眼-整合版/
-├── index.html      # 登入頁（已登入自動跳轉地圖大廳）
-├── register.html   # 註冊頁（Cyber-Neon 風格、頭像上傳）
-├── map.html        # 1.0 地圖大廳（Leaflet 地圖、角色切換、發案、接單、GPS、回報）
-├── tasks.html      # 2.0 任務管理（我發布的／我接受的／回報審核、互相評價）
-├── wallet.html     # 3.0 點數錢包（餘額、儲值、交易摘要、點數商城）
-├── history.html    # 3.1 完整交易明細
-├── profile.html    # 4.0 個人中心（頭像、隱私開關、改密碼、歷史評價、登出）
+順路眼/
+├── index.html          # 登入與註冊入口 (自動判斷狀態跳轉)
+├── register.html       # 註冊頁 (支援密碼確認與 Email 驗證)
+├── app.html            # 🌟 核心 SPA 單頁容器 (包含所有 View)
+├── 404.html            # Vercel 路由防護頁 (含智慧導航)
+├── manifest.json       # PWA 安裝設定檔
+├── icon.svg            # PWA 高清向量圖示
+├── sw.js               # Service Worker 快取腳本
+├── vercel.json         # Vercel 靜態路由快取控制
 ├── css/
-│   └── style.css   # 全站共用樣式
+│   └── style.css       # 全站共用與 RWD 樣式
 └── js/
     ├── firebase-config.js  # Firebase 初始化
-    ├── common.js           # 登入狀態守衛、交易紀錄寫入、共用工具
-    ├── auth.js             # 登入／註冊／開發者登入
-    ├── map.js              # 地圖大廳全部邏輯
-    ├── tasks.js            # 任務管理與評價
-    ├── wallet.js           # 錢包與交易明細
-    └── profile.js          # 個人中心
+    ├── common.js           # XSS防禦、共用狀態與 SweetAlert 封裝
+    ├── auth.js             # 登入邏輯與快速測試
+    ├── pwa-install.js      # 📱 iOS/Android 專屬 PWA 安裝提示機制
+    ├── app.js              # SPA 路由管理與 ResizeObserver
+    ├── map.js              # Leaflet 地圖、GPS 雷達點與動態生成
+    ├── tasks.js            # 發案、接單、回報與審核邏輯
+    ├── wallet.js           # 點數儲值與即時交易紀錄
+    └── profile.js          # 頭像上傳與個人資料維護
 ```
 
-## 相較原版修復的 Bug
+## 🛠️ 開發與部署指南
 
-1. **發布任務按鈕**：原版 `switchRole` 引用不存在的 `main-fab`，靠每 400ms
-   輪詢整個 DOM 的補丁（`forceGuardPublishButton`）硬撐。已改為正確切換並移除輪詢。
-2. **交易紀錄排序**：原版用中文時間字串（「下午 03:24」）做 `orderBy`，順序錯亂。
-   改為寫入數字時間戳 `ts` 並以此排序。
-3. **發布任務沒留帳**：原版扣 10 點但不寫交易紀錄，錢包對不上帳。已補上。
-4. **接單併發**：原版直接 update，多人搶單會互相覆蓋。改用 Firestore
-   Transaction，僅一人成功（符合規格書任務 3-2）。
-5. **開發者登入**：原版未在資料庫建立 dev 文件，儲值／兌換會直接報錯。已修正。
-6. **GPS 持續追蹤**：原版只 `getCurrentPosition` 定位一次。改用
-   `watchPosition`，走動時藍點自動跟隨並觸發抵達偵測（符合 GPS 規格步驟 5-4）。
-7. **搜尋崩潰防護**：任務 `title`／`desc` 為空時 `includes()` 會丟例外，已加防護。
-8. **隱私開關跨頁生效**：定位追蹤開關存於 `localStorage`，地圖頁與個人中心同步。
+由於使用了 Service Worker 與硬體 GPS API，專案**必須**在 `https://` 或 `localhost` 環境下才能正常運作。
 
-## 自舊版（報廢專題）保留的優點
-
-- Google Maps 標準底圖（解決原版 CartoDB 浮水印及 OSM 本機 403 阻擋問題，最熟悉的台灣地圖體驗）
-- JS 與 HTML 分離的檔案架構
-
-## 使用方式
-
-由於使用 Firebase 與瀏覽器定位，建議透過本機伺服器開啟（直接雙擊 HTML 也可運作，
-但 GPS 在非 https/localhost 環境會被瀏覽器封鎖）：
-
-```
-cd 順路眼-整合版
+### 本機測試
+```bash
 python -m http.server 8000
-# 瀏覽器開啟 http://localhost:8000
+# 使用瀏覽器開啟 http://localhost:8000
 ```
+> **快速測試**：點擊首頁「開發者登入 (快速測試)」即可一鍵取得包含 9999 點餘額的測試帳號。
 
-測試帳號：點「開發者登入 (快速測試)」即可（餘額 9999 點）。
+### 線上部署 (Vercel)
+專案已內建 `vercel.json`，直接將專案推送到 GitHub 並關聯至 Vercel，系統即會自動開啟 `cleanUrls`（隱藏 `.html` 副檔名）並套用正確的快取標頭 (Cache-Control)。
