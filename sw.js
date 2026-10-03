@@ -1,5 +1,5 @@
 /* 《順路眼》Service Worker — 離線快取 */
-const CACHE_VERSION = 'ontheway-v4';
+const CACHE_VERSION = 'ontheway-v5';
 
 // App Shell：首次安裝時預先快取的核心資源
 const APP_SHELL = [
@@ -13,6 +13,7 @@ const APP_SHELL = [
     '/css/style.css',
     '/js/firebase-config.js',
     '/js/common.js',
+    '/js/pwa-install.js',
     '/js/app.js',
     '/js/auth.js',
     '/js/map.js',
