@@ -1601,3 +1601,42 @@ input:checked + .slider:before { transform: translateX(22px); }
 /* SweetAlert Neon Styles */
 .swal-primary-btn { color: #fff !important; font-weight: bold !important; }
 div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm { background-color: var(--primary-color) !important; }
+
+/* === Live GPS Pulsing Dot === */
+.live-gps-dot {
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
+.live-gps-dot::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    background-color: var(--primary-color);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    z-index: 2;
+}
+.live-gps-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    z-index: 1;
+    animation: gps-pulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes gps-pulse {
+    0% { transform: scale(0.3); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0; }
+}

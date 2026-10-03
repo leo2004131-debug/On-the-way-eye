@@ -161,7 +161,7 @@ function selectSuggestion(lat, lng, name) {
         })
     }).addTo(map).bindPopup(name);
 
-    map.flyTo([lat, lng], 16);
+    map.flyTo([lat, lng], 16, { duration: 1.5 });
     landmarkMarker.openPopup();
 }
 
@@ -195,7 +195,7 @@ async function filterAndRenderTasks(kw, { autoFit = false, flyToOngoing = false 
                 }).addTo(map).on('click', () => showTaskDetail(ongoing));
                 taskMarkers.push(m);
                 if (flyToOngoing) {
-                    map.flyTo([ongoing.lat, ongoing.lng], 17);
+                    map.flyTo([ongoing.lat, ongoing.lng], 17, { duration: 1.5 });
                 }
                 activeTask = ongoing;
             } else {
@@ -284,7 +284,7 @@ async function toggleNearbyMode() {
     btn.classList.toggle('active', nearbyOnly);
 
     updateNearbyCircle();
-    if (nearbyOnly) map.flyTo([currentGps.lat, currentGps.lng], 13);
+    if (nearbyOnly) map.flyTo([currentGps.lat, currentGps.lng], 13, { duration: 1.5 });
     await filterAndRenderTasks(document.getElementById('search-input').value.trim());
 }
 
@@ -334,15 +334,17 @@ function onGpsUpdate(pos) {
     document.getElementById('locate-btn').innerText = '🛑 停止定位';
 
     if (!userMarker) {
-        userMarker = L.circleMarker([currentGps.lat, currentGps.lng], {
-            radius: 8, fillColor: '#FF3B30', color: '#fff',
-            weight: 3, opacity: 1, fillOpacity: 0.8
-        }).addTo(map);
+        const gpsIcon = L.divIcon({
+            className: 'live-gps-dot',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+        userMarker = L.marker([currentGps.lat, currentGps.lng], { icon: gpsIcon, zIndexOffset: 1000 }).addTo(map);
     } else {
         userMarker.setLatLng([currentGps.lat, currentGps.lng]);
     }
 
-    if (firstFix && !isGpsAutoResume) map.flyTo([currentGps.lat, currentGps.lng], 16);
+    if (firstFix && !isGpsAutoResume) map.flyTo([currentGps.lat, currentGps.lng], 16, { duration: 1.5 });
     updateNearbyCircle();
     checkArrival();
 }
@@ -361,6 +363,11 @@ function stopGps() {
     if (gpsWatchId !== null) {
         navigator.geolocation.clearWatch(gpsWatchId);
         gpsWatchId = null;
+    }
+    currentGps = null;
+    if (userMarker) {
+        map.removeLayer(userMarker);
+        userMarker = null;
     }
     setGpsStatus(false);
     document.getElementById('locate-btn').innerText = '🛰️ 開始定位';
@@ -442,7 +449,7 @@ async function acceptTask() {
             transaction.update(taskRef, { status: 'ongoing', handler: currentUser.email });
         });
         closeModal();
-        map.flyTo([selectedTask.lat, selectedTask.lng], 17);
+        map.flyTo([selectedTask.lat, selectedTask.lng], 17, { duration: 1.5 });
         await filterAndRenderTasks('');
         showToast('✅ 接單成功！請前往現場。');
     } catch (err) {
