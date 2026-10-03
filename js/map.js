@@ -3,7 +3,8 @@
 let map, userMarker = null;
 let taskMarkers = [];
 let currentGps = null;
-let gpsWatchId = null;          // watchPosition 持續追蹤 ID（規格書步驟 5-4）
+let gpsWatchId = null;
+let isGpsAutoResume = false;          // watchPosition 持續追蹤 ID（規格書步驟 5-4）
 let selectedTask = null;
 let activeTask = null;
 let isPickingLocation = false;
@@ -17,9 +18,10 @@ let nearbyCircle = null;
 document.addEventListener('DOMContentLoaded', async () => {
     if (!requireLogin()) return;
     updateHeaderAvatar();
+    const isFirstVisit = !sessionStorage.getItem('mapView');
     initMap();
     await refreshUserFromDB();
-    const isFirstVisit = !sessionStorage.getItem('mapView');
+    if (sessionStorage.getItem('gpsActive')) { toggleGps(true); }
     switchRole('recipient', { initial: isFirstVisit });
 });
 
@@ -319,13 +321,15 @@ function updateNearbyCircle() {
 }
 
 // --- GPS 持續追蹤（watchPosition，規格書步驟 5-4） ---
-function toggleGps() {
+function toggleGps(autoResume = false) {
+    isGpsAutoResume = autoResume;
     if (gpsWatchId !== null) { stopGps(); return; }
 
     if (!navigator.geolocation) { appAlert('此裝置不支援 GPS 定位。', 'error'); return; }
     if (!isTrackingEnabled()) { appAlert('您已在「個人中心」關閉定位追蹤，請先開啟。', 'error'); return; }
 
     document.getElementById('locate-btn').innerText = '🛰️ 定位中...';
+    sessionStorage.setItem('gpsActive', 'true');
     gpsWatchId = navigator.geolocation.watchPosition(onGpsUpdate, onGpsError, {
         enableHighAccuracy: true,
         maximumAge: 5000,
@@ -349,7 +353,7 @@ function onGpsUpdate(pos) {
         userMarker.setLatLng([currentGps.lat, currentGps.lng]);
     }
 
-    if (firstFix && !sessionStorage.getItem('mapView')) map.flyTo([currentGps.lat, currentGps.lng], 16);
+    if (firstFix && !isGpsAutoResume) map.flyTo([currentGps.lat, currentGps.lng], 16);
     updateNearbyCircle();
     checkArrival();
 }
@@ -371,6 +375,7 @@ function stopGps() {
     }
     setGpsStatus(false);
     document.getElementById('locate-btn').innerText = '🛰️ 開始定位';
+    sessionStorage.removeItem('gpsActive');
 }
 
 function setGpsStatus(connected) {
