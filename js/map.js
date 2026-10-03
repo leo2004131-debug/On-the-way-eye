@@ -19,13 +19,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateHeaderAvatar();
     initMap();
     await refreshUserFromDB();
-    switchRole('recipient', { initial: true });
+    const isFirstVisit = !sessionStorage.getItem('mapView');
+    switchRole('recipient', { initial: isFirstVisit });
 });
 
 // --- 地圖初始化 ---
 function initMap() {
+    // 還原上次離開時的視角（避免切分頁回來時重複縮放）
+    const saved = sessionStorage.getItem('mapView');
+    let initCenter = [25.0080, 121.4940];
+    let initZoom = 14;
+    if (saved) {
+        try {
+            const v = JSON.parse(saved);
+            initCenter = [v.lat, v.lng];
+            initZoom = v.zoom;
+        } catch (e) { /* ignore */ }
+    }
+
     map = L.map('map', { zoomControl: false, attributionControl: false })
-        .setView([25.0080, 121.4940], 14);
+        .setView(initCenter, initZoom);
+
+    // 持續記錄地圖視角
+    map.on('moveend', () => {
+        const c = map.getCenter();
+        sessionStorage.setItem('mapView', JSON.stringify({ lat: c.lat, lng: c.lng, zoom: map.getZoom() }));
+    });
 
     // 採用 Google Maps 圖資，解決 OSM 在本機測試時因 Referer 產生的 403 Forbidden 阻擋問題
     L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', {
@@ -330,7 +349,7 @@ function onGpsUpdate(pos) {
         userMarker.setLatLng([currentGps.lat, currentGps.lng]);
     }
 
-    if (firstFix) map.flyTo([currentGps.lat, currentGps.lng], 16);
+    if (firstFix && !sessionStorage.getItem('mapView')) map.flyTo([currentGps.lat, currentGps.lng], 16);
     updateNearbyCircle();
     checkArrival();
 }
