@@ -1,4 +1,20 @@
-html, body { height: var(--app-height, 100dvh); overflow: hidden; }
+html, body {
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+background-color: #222222;
+display: flex;
+justify-content: center;
+align-items: center;
+width: 100%;
+height: var(--app-height, 100dvh);
+min-height: var(--app-height, 100dvh);
+position: fixed;
+top: 0;
+left: 0;
+overflow: hidden;
+overscroll-behavior: none;
+margin: 0;
+padding: 0;
+}
 :root {
     }
 /* ============================================================
@@ -25,9 +41,9 @@ html, body { height: var(--app-height, 100dvh); overflow: hidden; }
 }
 
 html {
-    height: var(--app-height, 100dvh);
-    overscroll-behavior: none;
-    overflow: hidden;
+height: var(--app-height, 100dvh);
+overscroll-behavior: none;
+overflow: hidden;
 }
 
 body {
@@ -48,15 +64,15 @@ body {
 
 /* 手機外殼 */
 .app-container {
-    width: 100%;
-    max-width: 430px;
-    height: var(--app-height, 100dvh);
-    position: relative;
-    background-color: #ffffff;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+width: 100%;
+max-width: 430px;
+height: 100%;
+position: relative;
+background-color: #ffffff;
+box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+display: flex;
+flex-direction: column;
+overflow: hidden;
 }
 
 /* ---------- 頂部標題列（懸浮膠囊） ---------- */
@@ -137,32 +153,31 @@ main {
 
 /* ---------- 底部導覽列 ---------- */
 .bottom-nav {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: var(--nav-height);
-    padding-bottom: 0;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid #eeeeee;
-    box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.05);
-    z-index: 9999;
+flex-shrink: 0;
+position: relative;
+width: 100%;
+height: calc(var(--nav-height, 65px) + env(safe-area-inset-bottom));
+background-color: #ffffff;
+display: flex;
+justify-content: space-around;
+align-items: center;
+border-top: 1px solid #eeeeee;
+box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.05);
+z-index: 9999;
+padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-muted);
-    cursor: pointer;
-    text-decoration: none;
-    transition: transform 0.1s ease;
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+height: 100%;
+color: var(--text-muted);
+cursor: pointer;
+text-decoration: none;
+transition: transform 0.1s ease;
 }
 
 .nav-item:active { transform: scale(0.95); }
@@ -388,21 +403,29 @@ main {
 .reg-main-btn:active { transform: scale(0.98); }
 
 /* ---------- 1.0 地圖大廳 ---------- */
+#view-map {
+flex: 1;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+padding-bottom: 0;
+}
+
 .map-section {
-    position: relative;
-    width: 100%;
-    flex: 1;
-    overflow: hidden;
-    z-index: 1;
+position: relative;
+width: 100%;
+flex: 1;
+overflow: hidden;
+z-index: 1;
 }
 
 #map {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 1;
 }
 
 /* 頂部功能整合面板（搜尋 + 角色切換 + GPS 狀態） */

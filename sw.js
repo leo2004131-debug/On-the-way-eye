@@ -1,5 +1,5 @@
 /* 《順路眼》Service Worker — 離線快取 */
-const CACHE_VERSION = 'ontheway-v13';
+const CACHE_VERSION = 'ontheway-v14';
 
 // App Shell：首次安裝時預先快取的核心資源
 const APP_SHELL = [

@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>順路眼 NearPath - 大廳</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
     <link rel="stylesheet" href="css/style.css">
@@ -14,11 +14,7 @@
     <style>
         .spa-view { display: none; width: 100%; flex: 1; overflow: hidden; flex-direction: column; }
         .spa-view.active { display: flex; }
-        /* Override map specific flex issues */
-        #view-map { 
-            overflow: hidden; 
-            padding-bottom: var(--nav-height);
-        }
+        /* Map view styles moved to style.css */
         /* Clean up duplicate comments */
     </style>
 
