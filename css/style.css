@@ -587,7 +587,7 @@ min-height: 0;
 /* 定位按鈕 */
 .locate-btn {
     position: absolute;
-    bottom: 25px;
+    bottom: calc(var(--nav-height, 65px) + env(safe-area-inset-bottom) + 20px);
     right: 15px;
     background: white;
     border: none;
@@ -603,7 +603,7 @@ min-height: 0;
 /* 5 公里鄰近模式開關（左下角，與定位按鈕對稱） */
 .nearby-btn {
     position: absolute;
-    bottom: 25px;
+    bottom: calc(var(--nav-height, 65px) + env(safe-area-inset-bottom) + 20px);
     left: 15px;
     background: white;
     border: none;
@@ -627,7 +627,7 @@ min-height: 0;
 /* 發布任務按鈕（拇指熱區） */
 #publish-task-btn {
     position: absolute;
-    bottom: 15px;
+    bottom: calc(var(--nav-height, 65px) + env(safe-area-inset-bottom) + 15px);
     left: 50%;
     transform: translateX(-50%);
     background: linear-gradient(135deg, #ff6b00, #ff8800);
@@ -649,7 +649,7 @@ min-height: 0;
 /* 模擬移動方向鍵 */
 .movement-controls {
     position: absolute;
-    bottom: 85px;
+    bottom: calc(var(--nav-height, 65px) + env(safe-area-inset-bottom) + 80px);
     right: 15px;
     display: flex;
     flex-direction: column;
