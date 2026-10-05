@@ -410,20 +410,22 @@ min-height: 0;
 /* ---------- 1.0 地圖大廳 ---------- */
 #view-map {
 position: relative !important;
-flex: 1 1 0% !important;
+flex: 1 1 auto !important;
 min-height: 0 !important;
-flex-direction: column;
-overflow: hidden;
-padding-bottom: 0;
+display: flex !important;
+flex-direction: column !important;
+overflow: hidden !important;
+padding-bottom: 0 !important;
 }
 
 .map-section {
-position: relative !important;
-width: 100%;
-flex: 1 1 0% !important;
-min-height: 0 !important;
-overflow: hidden;
-z-index: 1;
+position: absolute !important;
+top: 0 !important;
+bottom: 0 !important;
+left: 0 !important;
+right: 0 !important;
+overflow: hidden !important;
+z-index: 1 !important;
 }
 
 #map {
@@ -627,8 +629,8 @@ transition: background 0.2s, color 0.2s;
 
 /* 發布任務按鈕（拇指熱區） */
 #publish-task-btn {
-    position: absolute;
-    bottom: calc(var(--nav-height, 65px) + env(safe-area-inset-bottom) + 15px);
+    position: absolute !important;
+    bottom: 20px !important;
     left: 50%;
     transform: translateX(-50%);
     background: linear-gradient(135deg, #ff6b00, #ff8800);
@@ -1636,7 +1638,7 @@ input:checked + .slider:before { transform: translateX(22px); }
     }
 }
 
-#toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+#toast-container { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .toast-msg { background: var(--surface-color); color: var(--text-main); padding: 12px 24px; border-radius: 25px; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--primary-color); animation: toastFadeIn 0.3s ease forwards; white-space: nowrap; }
 @keyframes toastFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes toastFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
