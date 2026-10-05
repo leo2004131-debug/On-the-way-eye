@@ -125,6 +125,7 @@ header h1 {
 /* ---------- 主要內容區 ---------- */
 main {
     flex: 1;
+min-height: 0;
     overflow-y: auto;
     padding: 80px 20px calc(var(--nav-height) + 20px);
     background-color: var(--bg-color);
@@ -169,6 +170,7 @@ padding-bottom: env(safe-area-inset-bottom);
 
 .nav-item {
 flex: 1;
+min-height: 0;
 display: flex;
 flex-direction: column;
 align-items: center;
@@ -235,7 +237,8 @@ transition: transform 0.1s ease;
     letter-spacing: 2px;
 }
 
-.login-body { flex: 1; }
+.login-body { flex: 1;
+min-height: 0; }
 
 .input-field { margin-bottom: 15px; }
 
@@ -379,6 +382,7 @@ transition: transform 0.1s ease;
 
 .neon-input-group input {
     flex: 1;
+min-height: 0;
     background: none;
     border: none;
     color: var(--text-main);
@@ -405,7 +409,7 @@ transition: transform 0.1s ease;
 /* ---------- 1.0 地圖大廳 ---------- */
 #view-map {
 flex: 1;
-display: flex;
+min-height: 0;
 flex-direction: column;
 overflow: hidden;
 padding-bottom: 0;
@@ -415,6 +419,7 @@ padding-bottom: 0;
 position: relative;
 width: 100%;
 flex: 1;
+min-height: 0;
 overflow: hidden;
 z-index: 1;
 }
@@ -507,6 +512,7 @@ z-index: 1;
 
 #search-input {
     flex: 1;
+min-height: 0;
     border: none;
     padding: 10px;
     font-size: 0.9rem;
@@ -547,6 +553,7 @@ z-index: 1;
 
 .role-btn {
     flex: 1;
+min-height: 0;
     background: transparent;
     border: none;
     outline: none;
@@ -899,6 +906,7 @@ z-index: 1;
 
 .review-modal-actions .cancel {
     flex: 1;
+min-height: 0;
     background: #eee;
     color: #333;
     border: none;
@@ -910,6 +918,7 @@ z-index: 1;
 
 .review-modal-actions .submit {
     flex: 1;
+min-height: 0;
     background: var(--primary-color);
     color: #fff;
     border: none;
@@ -929,6 +938,7 @@ z-index: 1;
 
 .task-tab {
     flex: 1;
+min-height: 0;
     padding: 15px 0;
     border: none;
     background: none;
