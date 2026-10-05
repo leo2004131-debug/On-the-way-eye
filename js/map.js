@@ -11,7 +11,7 @@ let isPickingLocation = false;
 let currentRole = 'recipient';
 
 // 5 公里鄰近模式：開啟時只顯示／只能接半徑內的任務
-const NEARBY_RADIUS = 5000; // 公尺
+let nearbyRadiusKm = 0; // 0=全部, 5, 10, 15
 let nearbyOnly = false;
 let nearbyCircle = null;
 // --- 地圖初始化 ---
@@ -208,7 +208,7 @@ async function filterAndRenderTasks(kw, { autoFit = false, flyToOngoing = false 
                 t.status === 'available' &&
                 ((t.title || '').includes(kw) || (t.desc || '').includes(kw)) &&
                 (!nearbyOnly || !currentGps ||
-                    calculateDistance(currentGps.lat, currentGps.lng, t.lat, t.lng) <= NEARBY_RADIUS)
+                    calculateDistance(currentGps.lat, currentGps.lng, t.lat, t.lng) <= nearbyRadiusKm * 1000)
             );
             lobbyTasks.forEach(t => {
                 const color = t.initiator === currentUser.email ? '#9C27B0' : '#2196F3';
@@ -274,17 +274,30 @@ async function switchRole(r, { initial = false } = {}) {
 
 // --- 5 公里鄰近模式開關 ---
 async function toggleNearbyMode() {
-    if (!nearbyOnly && !currentGps) {
-        { appAlert('請先點擊「開始定位」，才能開啟 5 公里範圍模式！', 'error'); return; }
+    if (nearbyRadiusKm === 0 && !currentGps) {
+        { appAlert('請先點擊「開始定位」，才能開啟鄰近範圍模式！', 'error'); return; }
     }
 
-    nearbyOnly = !nearbyOnly;
+    // Cycle: 0 -> 5 -> 10 -> 15 -> 0
+    if (nearbyRadiusKm === 0) nearbyRadiusKm = 5;
+    else if (nearbyRadiusKm === 5) nearbyRadiusKm = 10;
+    else if (nearbyRadiusKm === 10) nearbyRadiusKm = 15;
+    else nearbyRadiusKm = 0;
+
+    nearbyOnly = (nearbyRadiusKm > 0);
     const btn = document.getElementById('nearby-btn');
-    btn.innerText = nearbyOnly ? '📡 5km內任務' : '🌐 顯示全部任務';
+    btn.innerText = nearbyOnly ? `📡 ${nearbyRadiusKm}km 內任務` : '🌐 顯示全部任務';
     btn.classList.toggle('active', nearbyOnly);
 
     updateNearbyCircle();
-    if (nearbyOnly) map.flyTo([currentGps.lat, currentGps.lng], 13, { duration: 0.8 });
+    
+    if (nearbyOnly) {
+        // Adjust zoom level based on radius
+        let zoomLevel = 13;
+        if (nearbyRadiusKm === 10) zoomLevel = 12;
+        if (nearbyRadiusKm === 15) zoomLevel = 11;
+        map.flyTo([currentGps.lat, currentGps.lng], zoomLevel, { duration: 0.8 });
+    }
     await filterAndRenderTasks(document.getElementById('search-input').value.trim());
 }
 
@@ -293,7 +306,7 @@ function updateNearbyCircle() {
     if (nearbyOnly && currentGps) {
         if (!nearbyCircle) {
             nearbyCircle = L.circle([currentGps.lat, currentGps.lng], {
-                radius: NEARBY_RADIUS,
+                radius: nearbyRadiusKm * 1000,
                 color: '#FF6B00',
                 weight: 2,
                 dashArray: '8 6',
@@ -302,6 +315,7 @@ function updateNearbyCircle() {
             }).addTo(map);
         } else {
             nearbyCircle.setLatLng([currentGps.lat, currentGps.lng]);
+            nearbyCircle.setRadius(nearbyRadiusKm * 1000);
         }
     } else if (nearbyCircle) {
         map.removeLayer(nearbyCircle);
@@ -434,8 +448,8 @@ async function acceptTask() {
     }
     if (nearbyOnly) {
         const dist = calculateDistance(currentGps.lat, currentGps.lng, selectedTask.lat, selectedTask.lng);
-        if (dist > NEARBY_RADIUS) {
-            { appAlert(`❌ 此任務距離您約 ${(dist / 1000).toFixed(1)} 公里，超出 5 公里範圍，無法接受！\n（可關閉 5km 模式以接受遠處任務）`, 'error'); return; }
+        if (dist > nearbyRadiusKm * 1000) {
+            { appAlert(`❌ 此任務距離您約 ${(dist / 1000).toFixed(1)} 公里，超出 ${nearbyRadiusKm} 公里範圍，無法接受！\n（可點擊切換為更遠範圍以接受任務）`, 'error'); return; }
         }
     }
 
