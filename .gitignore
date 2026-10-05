@@ -10,3 +10,4 @@ node_modules/
 # OS metadata
 .DS_Store
 Thumbs.db
+fix_map_layout.py

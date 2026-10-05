@@ -15,7 +15,10 @@
         .spa-view { display: none; width: 100%; flex: 1; overflow: hidden; flex-direction: column; }
         .spa-view.active { display: flex; }
         /* Override map specific flex issues */
-        #view-map { overflow: hidden; }
+        #view-map { 
+            overflow: hidden; 
+            padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+        }
         /* Clean up duplicate comments */
     </style>
 
