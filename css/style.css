@@ -586,7 +586,7 @@ min-height: 0;
 /* 定位按鈕 */
 .locate-btn {
     position: absolute;
-    bottom: 20px;
+    bottom: 180px;
     right: 15px;
     background: white;
     border: none;
@@ -602,7 +602,7 @@ min-height: 0;
 /* 5 公里鄰近模式開關（左下角，與定位按鈕對稱） */
 .nearby-btn {
     position: absolute;
-    bottom: 20px;
+    bottom: 180px;
     left: 15px;
     background: white;
     border: none;
