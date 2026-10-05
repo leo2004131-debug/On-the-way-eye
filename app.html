@@ -12,7 +12,15 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        .spa-view { display: none; width: 100%; flex: 1; overflow: hidden; flex-direction: column; }
+        .spa-view {
+            display: none;
+            width: 100%;
+            flex: 1 1 0% !important;
+            overflow: hidden;
+            flex-direction: column;
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
+        }
         .spa-view.active { display: flex; }
         /* Map view styles moved to style.css */
         /* Clean up duplicate comments */
