@@ -27,6 +27,7 @@ html, body { height: var(--app-height, 100dvh); overflow: hidden; }
 html {
     height: var(--app-height, 100dvh);
     overscroll-behavior: none;
+    overflow: hidden;
 }
 
 body {
@@ -35,7 +36,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: var(--app-height, 100dvh); min-height: var(--app-height, 100dvh);
+    width: 100%;
+    height: var(--app-height, 100dvh); 
+    min-height: var(--app-height, 100dvh);
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow: hidden;
     overscroll-behavior: none;
 }
 
@@ -1656,9 +1663,18 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm { backgrou
     .spa-view {
         scrollbar-width: thin;
     }
+    main {
+        scrollbar-gutter: stable;
+    }
 }
 
-/* Fix Layout Shift from Scrollbars */
-main {
-    scrollbar-gutter: stable;
+/* Hide scrollbars on Mobile to feel like a native App */
+@media (max-width: 767px) {
+    *::-webkit-scrollbar {
+        display: none;
+    }
+    * {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 }
