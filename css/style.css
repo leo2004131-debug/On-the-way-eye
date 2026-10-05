@@ -408,18 +408,19 @@ min-height: 0;
 
 /* ---------- 1.0 地圖大廳 ---------- */
 #view-map {
-flex: 1;
-min-height: 0;
+position: relative !important;
+flex: 1 1 0% !important;
+min-height: 0 !important;
 flex-direction: column;
 overflow: hidden;
 padding-bottom: 0;
 }
 
 .map-section {
-position: relative;
+position: relative !important;
+flex: 1 1 0% !important;
+min-height: 0 !important;
 width: 100%;
-flex: 1;
-min-height: 0;
 overflow: hidden;
 z-index: 1;
 }
@@ -586,7 +587,7 @@ min-height: 0;
 /* 定位按鈕 */
 .locate-btn {
     position: absolute;
-    bottom: 180px;
+    bottom: 25px;
     right: 15px;
     background: white;
     border: none;
@@ -596,13 +597,13 @@ min-height: 0;
     font-size: 0.8rem;
     font-weight: bold;
     cursor: pointer;
-    z-index: 500;
+    z-index: 1000;
 }
 
 /* 5 公里鄰近模式開關（左下角，與定位按鈕對稱） */
 .nearby-btn {
     position: absolute;
-    bottom: 180px;
+    bottom: 25px;
     left: 15px;
     background: white;
     border: none;
@@ -612,7 +613,7 @@ min-height: 0;
     font-size: 0.8rem;
     font-weight: bold;
     cursor: pointer;
-    z-index: 500;
+    z-index: 1000;
     color: var(--text-main);
     transition: background 0.2s, color 0.2s;
 }
@@ -638,7 +639,7 @@ min-height: 0;
     border-radius: 30px;
     box-shadow: 0 4px 15px rgba(255, 107, 0, 0.4);
     cursor: pointer;
-    z-index: 500;
+    z-index: 1000;
     white-space: nowrap;
     transition: transform 0.1s ease;
 }
@@ -648,13 +649,13 @@ min-height: 0;
 /* 模擬移動方向鍵 */
 .movement-controls {
     position: absolute;
-    bottom: 80px;
+    bottom: 85px;
     right: 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    z-index: 500;
+    z-index: 1000;
 }
 
 .move-row { display: flex; gap: 5px; }
