@@ -1,3 +1,10 @@
+
+/* 修正 PWA 在手機上的 Viewport 邊界問題 */
+function setAppHeight() {
+    document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+}
+window.addEventListener('resize', setAppHeight);
+setAppHeight();
 /* 《順路眼》共用邏輯：登入狀態、導覽、工具函式 */
 
 // 註冊 Service Worker（離線快取）
