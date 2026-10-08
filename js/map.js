@@ -3,11 +3,10 @@
 let map, userMarker = null;
 let taskMarkers = [];
 let currentGps = null;
-let gpsOffset = { lat: 0, lng: 0 };
-let gpsWatchId = null;
-let isGpsAutoResume = false;          // watchPosition 持續追蹤 ID（規格書步驟 5-4）
+let gpsTimerId = null;
 let selectedTask = null;
 let activeTask = null;
+let alertedTaskId = null;
 let isPickingLocation = false;
 let currentRole = 'recipient';
 
@@ -323,47 +322,50 @@ function updateNearbyCircle() {
     }
 }
 
-// --- GPS 持續追蹤（watchPosition，規格書步驟 5-4） ---
+// --- 單次定位 (One-shot GPS) + 15 分鐘超時提示 ---
 function toggleGps(autoResume = false) {
-    isGpsAutoResume = autoResume;
-    if (gpsWatchId !== null) { stopGps(); return; }
-
     if (!navigator.geolocation) { appAlert('此裝置不支援 GPS 定位。', 'error'); return; }
     if (!isTrackingEnabled()) { appAlert('您已在「個人中心」關閉定位追蹤，請先開啟。', 'error'); return; }
 
-    document.getElementById('locate-btn').innerText = '🛰️ 定位中...';
+    const btn = document.getElementById('locate-btn');
+    btn.innerText = '🛰️ 定位中...';
     sessionStorage.setItem('gpsActive', 'true');
-    gpsWatchId = navigator.geolocation.watchPosition(onGpsUpdate, onGpsError, {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 15000
-    });
-}
 
-function onGpsUpdate(pos) {
-    const firstFix = !currentGps;
-    currentGps = { 
-        lat: pos.coords.latitude + gpsOffset.lat, 
-        lng: pos.coords.longitude + gpsOffset.lng 
-    };
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const firstFix = !currentGps;
+            currentGps = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            
+            setGpsStatus(true);
+            btn.innerText = '📍 刷新位置';
 
-    setGpsStatus(true);
-    document.getElementById('locate-btn').innerText = '🛑 停止定位';
+            if (!userMarker) {
+                const gpsIcon = L.divIcon({
+                    className: 'live-gps-dot',
+                    iconSize: [60, 60],
+                    iconAnchor: [30, 30]
+                });
+                userMarker = L.marker([currentGps.lat, currentGps.lng], { icon: gpsIcon, zIndexOffset: 1000 }).addTo(map);
+            } else {
+                userMarker.setLatLng([currentGps.lat, currentGps.lng]);
+            }
 
-    if (!userMarker) {
-        const gpsIcon = L.divIcon({
-            className: 'live-gps-dot',
-            iconSize: [60, 60],
-            iconAnchor: [30, 30]
-        });
-        userMarker = L.marker([currentGps.lat, currentGps.lng], { icon: gpsIcon, zIndexOffset: 1000 }).addTo(map);
-    } else {
-        userMarker.setLatLng([currentGps.lat, currentGps.lng]);
-    }
+            if (!autoResume || firstFix) map.flyTo([currentGps.lat, currentGps.lng], 16, { duration: 0.8 });
+            
+            updateNearbyCircle();
+            checkArrival();
 
-    if (firstFix && !isGpsAutoResume) map.flyTo([currentGps.lat, currentGps.lng], 16, { duration: 0.8 });
-    updateNearbyCircle();
-    checkArrival();
+            // 設定 15 分鐘後重新提示
+            if (gpsTimerId) clearTimeout(gpsTimerId);
+            gpsTimerId = setTimeout(async () => {
+                if (await appConfirm('距離上次更新位置已超過 15 分鐘，是否需要重新整理您的目前位置？')) {
+                    toggleGps();
+                }
+            }, 15 * 60 * 1000);
+        },
+        onGpsError,
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
 }
 
 function onGpsError(err) {
@@ -378,12 +380,11 @@ function onGpsError(err) {
 }
 
 function stopGps() {
-    if (gpsWatchId !== null) {
-        navigator.geolocation.clearWatch(gpsWatchId);
-        gpsWatchId = null;
+    if (gpsTimerId) {
+        clearTimeout(gpsTimerId);
+        gpsTimerId = null;
     }
     currentGps = null;
-    gpsOffset = { lat: 0, lng: 0 };
     if (userMarker) {
         map.removeLayer(userMarker);
         userMarker = null;
@@ -419,10 +420,10 @@ function moveUser(dir) {
     if (!currentGps) { appAlert('請先點擊「開始定位」！', 'error'); return; }
 
     const s = 0.0005;
-    if (dir === 'up') { gpsOffset.lat += s; currentGps.lat += s; }
-    else if (dir === 'down') { gpsOffset.lat -= s; currentGps.lat -= s; }
-    else if (dir === 'left') { gpsOffset.lng -= s; currentGps.lng -= s; }
-    else { gpsOffset.lng += s; currentGps.lng += s; }
+    if (dir === 'up') { currentGps.lat += s; }
+    else if (dir === 'down') { currentGps.lat -= s; }
+    else if (dir === 'left') { currentGps.lng -= s; }
+    else { currentGps.lng += s; }
 
     userMarker.setLatLng([currentGps.lat, currentGps.lng]);
     map.panTo([currentGps.lat, currentGps.lng]);
@@ -434,8 +435,15 @@ function checkArrival() {
     if (!activeTask || !currentGps) return;
     const dist = calculateDistance(currentGps.lat, currentGps.lng, activeTask.lat, activeTask.lng);
     const alertBox = document.getElementById('arrival-alert');
-    if (dist <= 100 && alertBox.style.display === 'none') {
-        alertBox.style.display = 'flex';
+    if (dist <= 100) {
+        if (alertedTaskId !== activeTask.id && alertBox.style.display === 'none') {
+            alertBox.style.display = 'flex';
+            alertedTaskId = activeTask.id;
+        }
+    } else {
+        if (alertedTaskId === activeTask.id) {
+            alertedTaskId = null;
+        }
     }
 }
 

@@ -68,7 +68,7 @@ async function renderManagementCenter() {
                 buttonHtml = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
                     <button onclick="abandonTask('${t.id}')" class="mini-rate-btn" style="background:#f44336; border-color:#f44336; color:#fff;">放棄接單</button>
-                    <div style="color:#777; font-size:0.8rem; text-align:right;">💡抵達目的地後自動彈出回報</div>
+                    <button onclick="document.getElementById('camera-input').click()" class="mini-rate-btn" style="background:#4CAF50; border-color:#4CAF50; color:#fff;">📸 手動拍照回報</button>
                 </div>`;
                 if (t.rejectReason) {
                     buttonHtml = `<p style="color:#f44336; font-size:13px; font-weight:bold; margin-bottom:8px;">⚠️ 委託人退回原因：${escapeHTML(t.rejectReason)}</p>` + buttonHtml;
