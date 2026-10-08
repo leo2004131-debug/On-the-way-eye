@@ -2,6 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/map(.html)?", "destination": "/app", "permanent": true },
+    { "source": "/tasks(.html)?", "destination": "/app", "permanent": true },
+    { "source": "/wallet(.html)?", "destination": "/app", "permanent": true },
+    { "source": "/profile(.html)?", "destination": "/app", "permanent": true },
+    { "source": "/history(.html)?", "destination": "/app", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/css/(.*)",

@@ -1,5 +1,5 @@
 /* 《順路眼》Service Worker — 離線快取 */
-const CACHE_VERSION = 'ontheway-v14';
+const CACHE_VERSION = 'ontheway-v15';
 
 // App Shell：首次安裝時預先快取的核心資源
 const APP_SHELL = [
@@ -63,11 +63,19 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(event.request)
                 .then(response => {
+                    if (response.status === 404) throw new Error('404');
                     const clone = response.clone();
                     caches.open(CACHE_VERSION).then(cache => cache.put(event.request, clone));
                     return response;
                 })
-                .catch(() => caches.match(event.request) || caches.match('/index.html'))
+                .catch(() => {
+                    const url = new URL(event.request.url);
+                    const cleanPath = url.pathname;
+                    return caches.match(event.request) 
+                        || caches.match(cleanPath + '.html') 
+                        || caches.match('/404.html')
+                        || caches.match('/index.html');
+                })
         );
         return;
     }

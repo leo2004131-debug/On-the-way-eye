@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /app.html
+Disallow: /profile
+Disallow: /tasks
+Disallow: /wallet
+Disallow: /history
+Disallow: /404.html
+
+# 如果未來有 Sitemap，可以將下方網址換成你的真實網域並解除註解
+# Sitemap: https://your-domain.com/sitemap.xml
+
