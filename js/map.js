@@ -207,8 +207,7 @@ async function filterAndRenderTasks(kw, { autoFit = false, flyToOngoing = false 
             const lobbyTasks = tasks.filter(t =>
                 t.status === 'available' &&
                 ((t.title || '').includes(kw) || (t.desc || '').includes(kw)) &&
-                (!nearbyOnly || !currentGps ||
-                    calculateDistance(currentGps.lat, currentGps.lng, t.lat, t.lng) <= nearbyRadiusKm * 1000)
+                (!nearbyOnly || (currentGps && calculateDistance(currentGps.lat, currentGps.lng, t.lat, t.lng) <= nearbyRadiusKm * 1000))
             );
             lobbyTasks.forEach(t => {
                 const color = t.initiator === currentUser.email ? '#9C27B0' : '#2196F3';
@@ -371,6 +370,7 @@ function onGpsError(err) {
     } else {
         appAlert('無法取得您的位置，請確認 GPS 已開啟。', 'info');
     }
+    stopGps();
 }
 
 function stopGps() {
@@ -386,6 +386,21 @@ function stopGps() {
     setGpsStatus(false);
     document.getElementById('locate-btn').innerText = '🛰️ 開始定位';
     sessionStorage.removeItem('gpsActive');
+
+    if (nearbyRadiusKm > 0) {
+        nearbyRadiusKm = 0;
+        nearbyOnly = false;
+        const btn = document.getElementById('nearby-btn');
+        if (btn) {
+            btn.innerText = '🌐 顯示全部任務';
+            btn.classList.remove('active');
+        }
+        if (nearbyCircle) {
+            map.removeLayer(nearbyCircle);
+            nearbyCircle = null;
+        }
+        filterAndRenderTasks('');
+    }
 }
 
 function setGpsStatus(connected) {

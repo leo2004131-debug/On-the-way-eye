@@ -55,6 +55,9 @@ async function handleChangePassword() {
 function handlePrivacyChange() {
     const on = document.getElementById('toggle-gps-tracking').checked;
     localStorage.setItem('gpsTracking', on ? 'on' : 'off');
+    if (!on && typeof stopGps === 'function') {
+        stopGps();
+    }
 }
 
 // --- 歷史評價 ---
