@@ -10,8 +10,8 @@ let alertedTaskId = null;
 let isPickingLocation = false;
 let currentRole = 'recipient';
 
-// 5 公里鄰近模式：開啟時只顯示／只能接半徑內的任務
-let nearbyRadiusKm = 0; // 0=全部, 5, 10, 15
+// 鄰近模式：開啟時只顯示／只能接半徑內的任務
+let nearbyRadiusKm = 0; // 0=全部, 1, 3, 5
 let nearbyOnly = false;
 let nearbyCircle = null;
 // --- 地圖初始化 ---
@@ -277,10 +277,10 @@ async function toggleNearbyMode() {
         { appAlert('請先點擊「開始定位」，才能開啟鄰近範圍模式！', 'error'); return; }
     }
 
-    // Cycle: 0 -> 5 -> 10 -> 15 -> 0
-    if (nearbyRadiusKm === 0) nearbyRadiusKm = 5;
-    else if (nearbyRadiusKm === 5) nearbyRadiusKm = 10;
-    else if (nearbyRadiusKm === 10) nearbyRadiusKm = 15;
+    // Cycle: 0 -> 1 -> 3 -> 5 -> 0
+    if (nearbyRadiusKm === 0) nearbyRadiusKm = 1;
+    else if (nearbyRadiusKm === 1) nearbyRadiusKm = 3;
+    else if (nearbyRadiusKm === 3) nearbyRadiusKm = 5;
     else nearbyRadiusKm = 0;
 
     nearbyOnly = (nearbyRadiusKm > 0);
@@ -290,12 +290,12 @@ async function toggleNearbyMode() {
 
     updateNearbyCircle();
     
-    if (nearbyOnly) {
-        // Adjust zoom level based on radius
-        let zoomLevel = 13;
-        if (nearbyRadiusKm === 10) zoomLevel = 12;
-        if (nearbyRadiusKm === 15) zoomLevel = 11;
-        map.flyTo([currentGps.lat, currentGps.lng], zoomLevel, { duration: 0.8 });
+    if (nearbyOnly && nearbyCircle) {
+        // 動態計算最適合螢幕的縮放比例，而非寫死 Zoom Level
+        map.flyToBounds(nearbyCircle.getBounds(), { 
+            padding: [30, 30], 
+            duration: 0.8 
+        });
     }
     await filterAndRenderTasks(document.getElementById('search-input').value.trim());
 }
