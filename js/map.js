@@ -3,6 +3,7 @@
 let map, userMarker = null;
 let taskMarkers = [];
 let currentGps = null;
+let gpsOffset = { lat: 0, lng: 0 };
 let gpsWatchId = null;
 let isGpsAutoResume = false;          // watchPosition 持續追蹤 ID（規格書步驟 5-4）
 let selectedTask = null;
@@ -341,7 +342,10 @@ function toggleGps(autoResume = false) {
 
 function onGpsUpdate(pos) {
     const firstFix = !currentGps;
-    currentGps = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    currentGps = { 
+        lat: pos.coords.latitude + gpsOffset.lat, 
+        lng: pos.coords.longitude + gpsOffset.lng 
+    };
 
     setGpsStatus(true);
     document.getElementById('locate-btn').innerText = '🛑 停止定位';
@@ -379,6 +383,7 @@ function stopGps() {
         gpsWatchId = null;
     }
     currentGps = null;
+    gpsOffset = { lat: 0, lng: 0 };
     if (userMarker) {
         map.removeLayer(userMarker);
         userMarker = null;
@@ -414,10 +419,10 @@ function moveUser(dir) {
     if (!currentGps) { appAlert('請先點擊「開始定位」！', 'error'); return; }
 
     const s = 0.0005;
-    if (dir === 'up') currentGps.lat += s;
-    else if (dir === 'down') currentGps.lat -= s;
-    else if (dir === 'left') currentGps.lng -= s;
-    else currentGps.lng += s;
+    if (dir === 'up') { gpsOffset.lat += s; currentGps.lat += s; }
+    else if (dir === 'down') { gpsOffset.lat -= s; currentGps.lat -= s; }
+    else if (dir === 'left') { gpsOffset.lng -= s; currentGps.lng -= s; }
+    else { gpsOffset.lng += s; currentGps.lng += s; }
 
     userMarker.setLatLng([currentGps.lat, currentGps.lng]);
     map.panTo([currentGps.lat, currentGps.lng]);
